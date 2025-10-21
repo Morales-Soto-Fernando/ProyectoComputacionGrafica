@@ -1,4 +1,8 @@
-﻿
+﻿/*
+Proyecto Equipo 6
+Fecha de entrega 19 de Noviembre del 2025
+315143977
+ */
 #include <iostream>
 #include <cmath>
 
@@ -301,7 +305,8 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Practica 12: Animacion KeyFrames-Leonardo Berdejo", nullptr, nullptr);
+
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Proyecto Equipo 6", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -342,8 +347,8 @@ int main()
 
 
 	//models
-	Model DogBody((char*)"Models//piso/Piso.obj");
-	Model HeadDog((char*)"Models/HeadDog.obj");
+	Model DogBody((char*)"Models/Galeria/Galeria.obj");
+	Model HeadDog((char*)"Models/piso/Piso.obj");
 	Model DogTail((char*)"Models/TailDog.obj");
 	Model F_RightLeg((char*)"Models/F_RightLegDog.obj");
 	Model F_LeftLeg((char*)"Models/F_LeftLegDog.obj");
@@ -464,7 +469,7 @@ int main()
 
 	// Set texture units
 	lightingShader.Use();
-	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 0);
+	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 1);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.specular"), 1);
 
 	///////////////////////////SKYBOX/////////////////////////
@@ -643,7 +648,7 @@ int main()
 		model = glm::mat4(1);
 		model = glm::rotate(model, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1); //activa o desactiva la transparencia, si se desactiva el interior de la galeria se vera negro
 		Ball.Draw(lightingShader);
 
 		// Restaura configuración normal
