@@ -2,6 +2,7 @@
 Proyecto Equipo 6
 Fecha de entrega 19 de Noviembre del 2025
 315143977
+318063188
  */
 #include <iostream>
 #include <cmath>
@@ -340,7 +341,7 @@ int main()
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
-
+	Shader shader("Shader/modelLoading.vs", "Shader/modelLoading.frag");
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 	Shader skyboxshader("Shader/SkyBox.vs", "Shader/SkyBox.frag");
@@ -356,6 +357,7 @@ int main()
 	Model B_LeftLeg((char*)"Models/B_LeftLegDog.obj");
 	Model Piso((char*)"Models/piso.obj");
 	Model Ball((char*)"Models/ball.obj");
+	Model Lampara((char*)"Models/streetlamp.obj");
 
 	//KeyFrames
 	for (int i = 0; i < MAX_FRAMES; i++)
@@ -639,6 +641,22 @@ int main()
 		model = glm::rotate(model, glm::radians(RLegs), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		B_RightLeg.Draw(lightingShader);
+
+
+		//Lámpara 1
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(35.0f, -1.0f, 10.0f));
+		model = glm::rotate(model, glm::radians(240.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(2.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Lampara.Draw(shader);
+
+		//Lámpara 2
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(-40.0f, -1.0f, -10.0f));
+		model = glm::rotate(model, glm::radians(240.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(2.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Lampara.Draw(shader);
+
 
 
 
