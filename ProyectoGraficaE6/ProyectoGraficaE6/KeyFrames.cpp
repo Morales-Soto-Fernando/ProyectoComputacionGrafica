@@ -348,7 +348,7 @@ int main()
 
 
 	//models
-	Model DogBody((char*)"Models/Galeria/Galeria.obj");
+	Model DogBody((char*)"Models/Galeria/Galeria2.obj");
 	Model HeadDog((char*)"Models/piso/Piso.obj");
 	Model DogTail((char*)"Models/TailDog.obj");
 	Model F_RightLeg((char*)"Models/F_RightLegDog.obj");
@@ -357,7 +357,7 @@ int main()
 	Model B_LeftLeg((char*)"Models/B_LeftLegDog.obj");
 	Model Piso((char*)"Models/piso.obj");
 	Model Ball((char*)"Models/ball.obj");
-	Model Lampara((char*)"Models/streetlamp.obj");
+	Model Lampara((char*)"Models/Exterior/streetlamp.obj");
 
 	//KeyFrames
 	for (int i = 0; i < MAX_FRAMES; i++)
