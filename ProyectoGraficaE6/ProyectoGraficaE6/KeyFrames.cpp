@@ -358,6 +358,9 @@ int main()
 	Model Piso((char*)"Models/piso.obj");
 	Model Ball((char*)"Models/ball.obj");
 	Model Lampara((char*)"Models/Exterior/streetlamp.obj");
+	Model Perro((char*)"Models/Exterior/13463_Australian_Cattle_Dog_v3.obj");
+	Model Arbol((char*)"Models/Exterior/10445_Oak_Tree_v1_max2010_iteration-1.obj");
+
 
 	//KeyFrames
 	for (int i = 0; i < MAX_FRAMES; i++)
@@ -657,7 +660,41 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.Draw(shader);
 
+		//Perro
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.1f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Perro.Draw(shader);
 
+		//Arbol 1
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(-15.0f, 0.5f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.05f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.Draw(shader);
+
+		//Arbol 2
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(50.0f, 0.5f, 30.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.05f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.Draw(shader);
+
+		//Arbol 3
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, -20.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.05f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.Draw(shader);
 
 
 		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
