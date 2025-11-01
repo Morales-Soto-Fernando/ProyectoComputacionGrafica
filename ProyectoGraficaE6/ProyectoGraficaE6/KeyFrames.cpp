@@ -348,7 +348,7 @@ int main()
 
 
 	//models
-	Model DogBody((char*)"Models/Galeria/Galeria2.obj");
+	Model DogBody((char*)"Models/Galeria/Galeria3.obj");
 	Model HeadDog((char*)"Models/piso/Piso.obj");
 	Model DogTail((char*)"Models/TailDog.obj");
 	Model F_RightLeg((char*)"Models/F_RightLegDog.obj");
@@ -710,7 +710,7 @@ int main()
 		model = glm::mat4(1);
 		model = glm::rotate(model, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1); //activa o desactiva la transparencia, si se desactiva el interior de la galeria se vera negro
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0); //activa o desactiva la transparencia, si se desactiva el interior de la galeria se vera negro
 		Ball.Draw(lightingShader);
 
 		// Restaura configuración normal
