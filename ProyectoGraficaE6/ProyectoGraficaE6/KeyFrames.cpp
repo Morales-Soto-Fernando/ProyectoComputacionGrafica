@@ -1,6 +1,6 @@
 ﻿/*
 Proyecto Equipo 6
-Fecha de entrega 19 de Noviembre del 2025
+Fecha de entrega 12 de Noviembre del 2025
 315143977
 318063188
  */
