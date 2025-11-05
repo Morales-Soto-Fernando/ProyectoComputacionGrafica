@@ -366,6 +366,7 @@ int main()
 	Model Witch((char*)"Models/Interior/witch2.obj");
 	Model Ritual((char*)"Models/Interior/ritual.obj");
 	Model Corpse((char*)"Models/Interior/corpse.obj");
+	Model Bat((char*)"Models/Exterior/Murcielago/bat.obj");
 
 	//KeyFrames
 	for (int i = 0; i < MAX_FRAMES; i++)
@@ -741,6 +742,14 @@ int main()
 		model = glm::scale(model, glm::vec3(0.30f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Corpse.Draw(shader);
+		//murcielago Prueba
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 15.30f, -18.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.30f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Bat.Draw(shader);
 
 		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
