@@ -3,6 +3,7 @@ Proyecto Equipo 6
 Fecha de entrega 12 de Noviembre del 2025
 315143977
 318063188
+319279207
  */
 #include <iostream>
 #include <cmath>
@@ -360,7 +361,11 @@ int main()
 	Model Lampara((char*)"Models/Exterior/streetlamp.obj");
 	Model Perro((char*)"Models/Exterior/13463_Australian_Cattle_Dog_v3.obj");
 	Model Arbol((char*)"Models/Exterior/10445_Oak_Tree_v1_max2010_iteration-1.obj");
-	Model Zombie((char*)"Models/Interior/Zombie_girl.obj");
+	Model Hands((char*)"Models/Interior/Portal.obj");
+	Model Demon((char*)"Models/Interior/Demon.obj");
+	Model Witch((char*)"Models/Interior/witch2.obj");
+	Model Ritual((char*)"Models/Interior/ritual.obj");
+	Model Corpse((char*)"Models/Interior/corpse.obj");
 
 	//KeyFrames
 	for (int i = 0; i < MAX_FRAMES; i++)
@@ -688,21 +693,54 @@ int main()
 		Arbol.Draw(shader);
 
 		//Arbol 3
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, -20.0f));
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, -50.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.05f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Arbol.Draw(shader);
-		//Xombie
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 52.0f));
+		//Manos
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(16.50f, 8.7f, -25.50f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(1.5f));
+		model = glm::scale(model, glm::vec3(2.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Zombie.Draw(shader);
+		Hands.Draw(shader);
+		//Demon
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 8.40f, -21.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(25.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.30f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Demon.Draw(shader);
+
+		//Witcher
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 0.30f, -14.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(3.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Witch.Draw(shader);
+		//Ritual
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 1.20f, -18.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(3.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Ritual.Draw(shader);
+		//cadaver
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 2.30f, -18.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.30f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Corpse.Draw(shader);
 
 		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

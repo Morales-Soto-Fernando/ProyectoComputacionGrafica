@@ -1,0 +1,33 @@
+# Blender 4.5.3 LTS MTL File: 'Portal.blend'
+# www.blender.org
+
+newmtl M_Hands
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 3
+map_Kd textures_portal/T_Hands_D02.png
+map_Ns textures_portal/T_Hands_R01.png
+map_d textures_portal/T_Hands_D02.png
+map_Bump -bm 1.000000 textures_portal/T_Hands_N01.png
+
+newmtl M_Plane
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl spiral
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd textures_portal/T_Vortex_D01.png
+map_d textures_portal/T_Vortex_D01.png
