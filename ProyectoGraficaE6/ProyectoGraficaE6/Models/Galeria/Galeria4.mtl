@@ -1,4 +1,4 @@
-# Blender 4.5.3 LTS MTL File: 'Galeria4.blend'
+# Blender 4.5.4 LTS MTL File: 'Galeria3.blend'
 # www.blender.org
 
 newmtl 02___Default
@@ -20,6 +20,36 @@ Ni 1.500000
 d 1.000000
 illum 1
 map_Kd Textura/ventanas.jpg
+
+newmtl 03___Default
+Ns 10.000005
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd Textura/pared.jpg
+
+newmtl 07___Default
+Ns 10.000005
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd Textura/papel.png
+
+newmtl 08___Default
+Ns 10.000005
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd Textura/papel.jpg
 
 newmtl 09___Default
 Ns 10.000005
@@ -51,26 +81,6 @@ d 1.000000
 illum 1
 map_Kd Textura/techo.jpg
 
-newmtl 20___Default
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura6.jpg
-
-newmtl 20___Default.001
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga7.jpg
-
 newmtl 20___Default.002
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
@@ -90,16 +100,6 @@ Ni 1.500000
 d 1.000000
 illum 1
 map_Kd Pinturas/maps/pinturalarga1.jpg
-
-newmtl 20___Default.004
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga8.jpg
 
 newmtl 20___Default.005
 Ns 10.000005
@@ -131,46 +131,6 @@ d 1.000000
 illum 1
 map_Kd Pinturas/maps/pintura1.jpg
 
-newmtl 20___Default.008
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura3.jpg
-
-newmtl 20___Default.009
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura4.jpg
-
-newmtl 20___Default.010
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura5.jpg
-
-newmtl 20___Default.011
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga11.jpg
-
 newmtl 20___Default.012
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
@@ -181,7 +141,7 @@ d 1.000000
 illum 1
 map_Kd Pinturas/maps/pinturalarga6.jpg
 
-newmtl 20___Default.014
+newmtl 20___Default.013
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
@@ -189,7 +149,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd Pinturas/maps/pinturalarga9.jpg
+map_Kd Pinturas/maps/pintura6.jpg
 
 newmtl 20___Default.015
 Ns 10.000005
@@ -199,7 +159,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd Pinturas/maps/pinturalarga13.jpg
+map_Kd Pinturas/maps/pinturalarga8.jpg
 
 newmtl 20___Default.016
 Ns 10.000005
@@ -209,9 +169,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd Pinturas/maps/pintura8.jpg
+map_Kd Pinturas/maps/pinturalarga9.jpg
 
-newmtl 20___Default.019
+newmtl 20___Default.018
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
@@ -219,57 +179,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd Pinturas/maps/pinturalarga10.jpg
-
-newmtl 20___Default.020
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga12.jpg
-
-newmtl 20___Default.021
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga14.jpg
-
-newmtl 20___Default.022
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga15.jpg
-
-newmtl 20___Default.023
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga17.jpg
-
-newmtl 20___Default.025
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga16.jpg
+map_Kd Pinturas/maps/pinturalarga11.jpg
 
 newmtl 20___Default.026
 Ns 10.000005
@@ -279,207 +189,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd Pinturas/maps/pintura9.jpg
-
-newmtl 20___Default.027
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura10.jpg
-
-newmtl 20___Default.030
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga18.jpg
-
-newmtl 20___Default.031
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura11.jpg
-
-newmtl 20___Default.032
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura12.jpg
-
-newmtl 20___Default.033
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura13.jpg
-
-newmtl 20___Default.034
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura14.jpg
-
-newmtl 20___Default.035
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura15.jpg
-
-newmtl 20___Default.037
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga20.jpg
-
-newmtl 20___Default.038
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga21.jpg
-
-newmtl 20___Default.039
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga22.jpg
-
-newmtl 20___Default.040
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura16.jpg
-
-newmtl 20___Default.041
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura17.jpg
-
-newmtl 20___Default.042
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pinturalarga23.jpg
-
-newmtl 20___Default.046
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura7.jpg
-
-newmtl 20___Default.047
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura18.jpg
-
-newmtl 20___Default.048
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
 map_Kd Pinturas/maps/pinturalarga19.jpg
-
-newmtl 20___Default.049
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/cartel.jpg
-
-newmtl 20___Default.050
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/cartel2.jpg
-
-newmtl 20___Default.051
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/Reglamento.jpg
-
-newmtl 20___Default.052
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/pintura19.jpg
 
 newmtl M_DividerWall
 Ka 1.000000 1.000000 1.000000
@@ -489,8 +199,8 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd Textura/papel.jpg
-map_Ns Textura/paper-texture_<UDIM>-6010.jpg
-map_Bump -bm 1.000000 Textura/paper-texture_<UDIM>-6010.jpg
+map_Ns C:/DividerWallRoughness.png
+map_Bump -bm 1.000000 C:/DividerWallNormal.png
 
 newmtl M_DividerWall.001
 Ka 1.000000 1.000000 1.000000
@@ -513,26 +223,6 @@ d 1.000000
 illum 2
 map_Kd Textura/papel.jpg
 
-newmtl _Sharkgreatwhiteshark_eye
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.001
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
 newmtl _Sharkgreatwhiteshark_eye.002
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
@@ -544,16 +234,6 @@ illum 1
 map_Kd Pinturas/maps/negro.jpg
 
 newmtl _Sharkgreatwhiteshark_eye.003
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.004
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
@@ -593,46 +273,6 @@ d 1.000000
 illum 1
 map_Kd Pinturas/maps/negro.jpg
 
-newmtl _Sharkgreatwhiteshark_eye.008
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.009
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.010
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.011
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
 newmtl _Sharkgreatwhiteshark_eye.012
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
@@ -643,7 +283,7 @@ d 1.000000
 illum 1
 map_Kd Pinturas/maps/negro.jpg
 
-newmtl _Sharkgreatwhiteshark_eye.014
+newmtl _Sharkgreatwhiteshark_eye.013
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
@@ -673,57 +313,7 @@ d 1.000000
 illum 1
 map_Kd Pinturas/maps/negro.jpg
 
-newmtl _Sharkgreatwhiteshark_eye.019
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.020
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.021
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.022
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.023
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.025
+newmtl _Sharkgreatwhiteshark_eye.018
 Ns 10.000005
 Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
@@ -743,226 +333,6 @@ d 1.000000
 illum 1
 map_Kd Pinturas/maps/negro.jpg
 
-newmtl _Sharkgreatwhiteshark_eye.027
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.030
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.031
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.032
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.033
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.034
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.035
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.037
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.038
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.039
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.040
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.041
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.042
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.046
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.047
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.048
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.049
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.050
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.051
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl _Sharkgreatwhiteshark_eye.052
-Ns 10.000005
-Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 1
-map_Kd Pinturas/maps/negro.jpg
-
-newmtl beige
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.001
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
 newmtl beige.002
 Ns 96.078392
 Ka 1.000000 1.000000 1.000000
@@ -974,16 +344,6 @@ illum 2
 map_Kd Pinturas/maps/HR1.jpg
 
 newmtl beige.003
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.004
 Ns 96.078392
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -1023,46 +383,6 @@ d 1.000000
 illum 2
 map_Kd Pinturas/maps/HR1.jpg
 
-newmtl beige.008
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.009
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.010
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.011
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
 newmtl beige.012
 Ns 96.078392
 Ka 1.000000 1.000000 1.000000
@@ -1073,7 +393,7 @@ d 1.000000
 illum 2
 map_Kd Pinturas/maps/HR1.jpg
 
-newmtl beige.014
+newmtl beige.013
 Ns 96.078392
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -1103,57 +423,7 @@ d 1.000000
 illum 2
 map_Kd Pinturas/maps/HR1.jpg
 
-newmtl beige.019
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.020
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.021
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.022
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.023
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.025
+newmtl beige.018
 Ns 96.078392
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -1173,202 +443,12 @@ d 1.000000
 illum 2
 map_Kd Pinturas/maps/HR1.jpg
 
-newmtl beige.027
-Ns 96.078392
+newmtl wire_141007058
+Ns 0.000000
 Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
+Ks 0.350000 0.350000 0.350000
 Ke 0.000000 0.000000 0.000000
-Ni 1.500000
+Ni 0.000000
 d 1.000000
 illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.030
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.031
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.032
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.033
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.034
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.035
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.037
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.038
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.039
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.040
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.041
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.042
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.046
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.047
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.048
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.049
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.050
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.051
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
-
-newmtl beige.052
-Ns 96.078392
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd Pinturas/maps/HR1.jpg
+map_Kd Textura/pared.jpg
