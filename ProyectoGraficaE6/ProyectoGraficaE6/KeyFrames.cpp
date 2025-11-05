@@ -348,7 +348,7 @@ int main()
 
 
 	//models
-	Model DogBody((char*)"Models/Galeria/Galeria3.obj");
+	Model DogBody((char*)"Models/Galeria/Galeria4.obj");
 	Model HeadDog((char*)"Models/piso/Piso.obj");
 	Model DogTail((char*)"Models/TailDog.obj");
 	Model F_RightLeg((char*)"Models/F_RightLegDog.obj");
