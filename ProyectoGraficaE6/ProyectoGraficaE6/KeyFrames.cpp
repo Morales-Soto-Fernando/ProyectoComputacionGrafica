@@ -8,6 +8,7 @@ Fecha de entrega 12 de Noviembre del 2025
 #include <iostream>
 #include <cmath>
 
+
 // GLEW
 #include <GL/glew.h>
 
@@ -31,6 +32,7 @@ Fecha de entrega 12 de Noviembre del 2025
 #include "Camera.h"
 #include "Model.h"
 #include "Texture.h"
+
 
 
 // Function prototypes
@@ -123,6 +125,7 @@ float radio = 0.0f;  // Radio del círculo
 float angle = 0.0f;  // Ángulo inicial
 bool moveRot = false;
 float speed = 0.0001f;
+
 
 
 //KeyFrames
@@ -306,6 +309,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
+
 	// Create a GLFWwindow object that we can use for GLFW's functions
 
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Proyecto Equipo 6", nullptr, nullptr);
@@ -367,6 +371,12 @@ int main()
 	Model Ritual((char*)"Models/Interior/ritual.obj");
 	Model Corpse((char*)"Models/Interior/corpse.obj");
 	Model Bat((char*)"Models/Exterior/Murcielago/bat.obj");
+	Model Sofa((char*)"Models/Interior/sofa.obj");
+	Model Recepcion((char*)"Models/Interior/recepcion.obj");
+	Model Mesa((char*)"Models/Exterior/picnic_table.obj");
+	
+
+
 
 	//KeyFrames
 	for (int i = 0; i < MAX_FRAMES; i++)
@@ -702,7 +712,7 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Arbol.Draw(shader);
 		//Manos
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(16.50f, 8.7f, -25.50f));
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 8.7f, 25.5f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -710,7 +720,7 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Hands.Draw(shader);
 		//Demon
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 8.40f, -21.0f));
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 8.40f, -6.8f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(25.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -719,15 +729,15 @@ int main()
 		Demon.Draw(shader);
 
 		//Witcher
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 0.30f, -14.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(-25.0f, 0.30f, -15.0f));
+		model = glm::rotate(model, glm::radians(65.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(3.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Witch.Draw(shader);
 		//Ritual
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 1.20f, -18.0f));
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(23.8f, 0.7f, -14.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -735,8 +745,8 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Ritual.Draw(shader);
 		//cadaver
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 2.30f, -18.0f));
-		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(23.9f, 2.30f, -15.5f));
+		model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.30f));
@@ -750,6 +760,52 @@ int main()
 		model = glm::scale(model, glm::vec3(0.30f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Bat.Draw(shader);
+
+		// Sofa 1
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(15.0f, 0.5f, 52.5f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.03f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Sofa.Draw(shader);
+
+
+		// Sofa 4
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.03f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Sofa.Draw(shader);
+
+		// Sofa 5
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 40.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.03f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Sofa.Draw(shader);
+
+		// Sofa 6
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 35.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.03f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Sofa.Draw(shader);
+
+		// Recepcion
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(7.0f, 0.5f, 51.5f));
+		model = glm::rotate(model, glm::radians(350.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.08f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Recepcion.Draw(shader);
+
+		// Mesa
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(45.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.05f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Mesa.Draw(shader);
+
+		
+
 
 		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
