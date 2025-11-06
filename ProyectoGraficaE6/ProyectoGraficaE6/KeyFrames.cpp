@@ -769,21 +769,21 @@ int main()
 		Sofa.Draw(shader);
 
 
-		// Sofa 4
+		// Sofa 2
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 45.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Sofa.Draw(shader);
 
-		// Sofa 5
+		// Sofa 3
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 40.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Sofa.Draw(shader);
 
-		// Sofa 6
+		// Sofa 4
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 35.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f));
@@ -797,7 +797,7 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Recepcion.Draw(shader);
 
-		// Mesa
+		// Mesa Picnic
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(45.0f, 0.5f, 45.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.05f));
