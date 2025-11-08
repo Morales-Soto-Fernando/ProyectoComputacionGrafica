@@ -121,11 +121,20 @@ float RLegs = 0.0f;
 float head = 0.0f;
 float tail = 0.0f;
 
-float radio = 0.0f;  // Radio del círculo
+//float radio = 0.0f;  // Radio del círculo
 float angle = 0.0f;  // Ángulo inicial
 bool moveRot = false;
 float speed = 0.0001f;
 
+// Variables globales del murciélago
+float batPosX = 17.3f;
+float batPosY = 14.5f;
+float batPosZ = 35.0f;
+float batAngle = 0.0f;
+float wingAngle = 0.0f;
+bool wingUp = true;
+float tailSwing = 0.5f;
+int batDirection = 1;
 
 
 //KeyFrames
@@ -353,7 +362,7 @@ int main()
 
 
 	//models
-	Model DogBody((char*)"Models/Galeria/escultura/abuelo/viejo1.obj");
+	Model DogBody((char*)"Models/Galeria/Galeria4.obj");
 	Model HeadDog((char*)"Models/piso/Piso.obj");
 	Model DogTail((char*)"Models/TailDog.obj");
 	Model F_RightLeg((char*)"Models/F_RightLegDog.obj");
@@ -370,7 +379,14 @@ int main()
 	Model Witch((char*)"Models/Interior/witch2.obj");
 	Model Ritual((char*)"Models/Interior/ritual.obj");
 	Model Corpse((char*)"Models/Interior/corpse.obj");
-	Model Bat((char*)"Models/Exterior/Murcielago/bat.obj");
+
+
+	Model BatAguja((char*)"Models/Exterior/Murcielago/Aguja.obj");
+	Model BatAlader((char*)"Models/Exterior/Murcielago/Alader.obj");
+	Model BatAlaizq((char*)"Models/Exterior/Murcielago/Alaizq.obj");
+	Model BatCuerpo((char*)"Models/Exterior/Murcielago/Torsomurci.obj");
+
+
 	Model Sofa((char*)"Models/Interior/sofa.obj");
 	Model Recepcion((char*)"Models/Interior/recepcion.obj");
 	Model Mesa((char*)"Models/Exterior/picnic_table.obj");
@@ -530,6 +546,7 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 		Animation();
+		
 
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -608,6 +625,31 @@ int main()
 
 		glm::mat4 model(1);
 
+		// --- ANIMACIÓN DEL MURCIÉLAGO ---
+		float tiempo = glfwGetTime();
+
+		// Radio de la circunferencia del vuelo
+		float radio = 25.5f;
+		float velocidadVuelo = 0.5f;
+		batPosX = cos(tiempo * velocidadVuelo) * radio + 15.0f;  // centrado donde antes estaba
+		batPosZ = sin(tiempo * velocidadVuelo) * radio + 40.0f;
+		batPosY = 14.0f + sin(tiempo * 2.0f) * 12.5f; // pequeño aleteo vertical
+
+		batAngle = -glm::degrees(tiempo * velocidadVuelo) - 90.0f; // rotar en dirección del vuelo
+
+		// Velocidad de movimiento 
+		float velocidadAla = 0.09f;
+		if (wingUp)
+			wingAngle += velocidadAla;
+		else
+			wingAngle -= velocidadAla;
+
+		// Apertura de las alas
+		if (wingAngle > 2.0f) wingUp = false;
+		if (wingAngle < -2.0f) wingUp = true;
+
+		// Movimiento de la cola
+		tailSwing = sin(tiempo * 3.0f) * 15.0f;
 
 
 		//Carga de modelo 
@@ -752,14 +794,42 @@ int main()
 		model = glm::scale(model, glm::vec3(0.30f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Corpse.Draw(shader);
-		//murcielago Prueba
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(17.30f, 15.30f, -18.0f));
-		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(0.30f));
+
+		// --- MATRIZ BASE DEL MURCIELAGO ---
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(batPosX, batPosY, batPosZ));
+		model = glm::rotate(model, glm::radians(batAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f));
+
+		// --- TORSO ---
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Bat.Draw(shader);
+		BatCuerpo.Draw(shader);
+
+		// --- COLA ---
+		glm::mat4 tail = model;
+		tail = glm::translate(tail, glm::vec3(0.0f, -0.05f, -0.20f)); // más unida al cuerpo
+		tail = glm::rotate(tail, glm::radians(tailSwing), glm::vec3(0.0f, 1.0f, 0.0f)); // leve balanceo lateral
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(tail));
+		BatAguja.Draw(shader);
+
+		// --- ALA DERECHA ---
+		glm::mat4 rightWing = model;
+		rightWing = glm::translate(rightWing, glm::vec3(0.35f, 0.05f, 0.0f)); // punto base del ala
+		rightWing = glm::translate(rightWing, glm::vec3(-0.35f, 0.0f, 0.0f)); // mover pivote al origen
+		rightWing = glm::rotate(rightWing, glm::radians(-wingAngle), glm::vec3(0.0f, 0.0f, 1.0f)); // rotar desde la raíz
+		rightWing = glm::translate(rightWing, glm::vec3(0.35f, 0.0f, 0.0f)); // regresar a posición original
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(rightWing));
+		BatAlader.Draw(shader);
+
+		// --- ALA IZQUIERDA ---
+		glm::mat4 leftWing = model;
+		leftWing = glm::translate(leftWing, glm::vec3(-0.35f, 0.05f, 0.0f)); // punto base del ala
+		leftWing = glm::translate(leftWing, glm::vec3(0.35f, 0.0f, 0.0f)); // mover pivote
+		leftWing = glm::rotate(leftWing, glm::radians(wingAngle), glm::vec3(0.0f, 0.0f, 1.0f)); // rotar desde la raíz
+		leftWing = glm::translate(leftWing, glm::vec3(-0.35f, 0.0f, 0.0f)); // regresar pivote
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(leftWing));
+		BatAlaizq.Draw(shader);
+
 
 		// Sofa 1
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(15.0f, 0.5f, 52.5f));
