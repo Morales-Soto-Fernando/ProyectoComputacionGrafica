@@ -137,6 +137,16 @@ bool wingUp = true;
 float tailSwing = 0.5f;
 int batDirection = 1;
 
+// Variables globales del segundo murciélago
+float bat2PosX = 10.0f;
+float bat2PosY = 20.0f;
+float bat2PosZ = 5.0f;
+float bat2Angle = 0.0f;
+float wingAngle2 = 0.0f;
+bool wingUp2 = true;
+
+
+
 // ---- Persona (variables propias) ----
 float perPosX = 0.0f, perPosY = 0.0f, perPosZ = 0.0f;  // posición de la persona
 float perRotY = 0.0f, perRotX = 0.0f;                  // yaw/pitch del torso
@@ -400,23 +410,25 @@ int main()
 
 
 	//models
-	Model DogBody((char*)"Models/Galeria/Galeria4.obj");
-	Model HeadDog((char*)"Models/piso/Piso.obj");
-	Model DogTail((char*)"Models/TailDog.obj");
-	Model F_RightLeg((char*)"Models/F_RightLegDog.obj");
-	Model F_LeftLeg((char*)"Models/F_LeftLegDog.obj");
-	Model B_RightLeg((char*)"Models/B_RightLegDog.obj");
-	Model B_LeftLeg((char*)"Models/B_LeftLegDog.obj");
-	Model Piso((char*)"Models/piso.obj");
-	Model Ball((char*)"Models/ball.obj");
+	Model Galeria((char*)"Models/Galeria/Galeria4.obj");
+	Model Piso((char*)"Models/piso/Piso.obj");
 	Model Lampara((char*)"Models/Exterior/streetlamp.obj");
-	Model Perro((char*)"Models/Exterior/13463_Australian_Cattle_Dog_v3.obj");
 	Model Arbol((char*)"Models/Exterior/10445_Oak_Tree_v1_max2010_iteration-1.obj");
 	Model Hands((char*)"Models/Interior/Portal.obj");
 	Model Demon((char*)"Models/Interior/Demon.obj");
 	Model Witch((char*)"Models/Interior/witch2.obj");
 	Model Ritual((char*)"Models/Interior/ritual.obj");
 	Model Corpse((char*)"Models/Interior/corpse.obj");
+
+	// Perro
+	Model PerroTor((char*)"Models/Exterior/PeroCortado2/PerroTorso.obj");
+	Model PerroCab((char*)"Models/Exterior/PeroCortado2/PerroCabeza.obj");
+	Model PerroCol((char*)"Models/Exterior/PeroCortado2/Cola.obj");
+	Model PerroPatFD((char*)"Models/Exterior/PeroCortado2/PataFroder.obj");
+	Model PerroPatFI((char*)"Models/Exterior/PeroCortado2/PataFroizq.obj");
+	Model PerroPatTD((char*)"Models/Exterior/PeroCortado2/PataTrader.obj");
+	Model PerroPatTI((char*)"Models/Exterior/PeroCortado2/PataTraizq.obj");
+
 
 	//Murcielago
 	Model BatAguja((char*)"Models/Exterior/Murcielago/Aguja.obj");
@@ -675,7 +687,7 @@ int main()
 
 		glm::mat4 model(1);
 
-		// --- ANIMACIÓN DEL MURCIÉLAGO ---
+		// --- ANIMACIÓN DEL PRIMER MURCIÉLAGO 
 		float tiempo = glfwGetTime();
 
 		// Radio de la circunferencia del vuelo
@@ -695,63 +707,57 @@ int main()
 			wingAngle -= velocidadAla;
 
 		// Apertura de las alas
-		if (wingAngle > 2.0f) wingUp = false;
-		if (wingAngle < -2.0f) wingUp = true;
+		if (wingAngle > 1.5f) wingUp = false;
+		if (wingAngle < -1.5f) wingUp = true;
 
 		// Movimiento de la cola
 		tailSwing = sin(tiempo * 3.0f) * 15.0f;
 
 
-		//Carga de modelo 
+		// --- ANIMACIÓN DEL SEGUNDO MURCIÉLAGO
+		float tiempo2 = glfwGetTime();
+
+		// Radio de la circunferencia del vuelo
+		float radio2 = 10.0f;
+		float velocidadVuelo2 = 0.5f;
+		bat2PosX = cos(tiempo2 * velocidadVuelo2) * radio2 + 15.0f;  // centrado donde antes estaba
+		bat2PosZ = sin(tiempo2 * velocidadVuelo2) * radio2 + 40.0f;
+		bat2PosY = 21.0f + sin(tiempo2 * 2.0f) * 12.5f; // pequeño aleteo vertical
+
+		bat2Angle = -glm::degrees(tiempo2 * velocidadVuelo2) - 90.0f; // rotar en dirección del vuelo
+
+		// Velocidad de movimiento 
+		float velocidadAla2 = 0.095f;
+		if (wingUp2)
+			wingAngle2 += velocidadAla2;
+		else
+			wingAngle2 -= velocidadAla2;
+
+		// Apertura de las alas
+		if (wingAngle2 > 1.5f) wingUp2 = false;
+		if (wingAngle2 < -1.5f) wingUp2 = true;
+
+
+
+		// Carga de modelo 
 		view = camera.GetViewMatrix();
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Piso.Draw(lightingShader);
+		//Piso2.Draw(lightingShader);
 
-		//Body
+		// Galeria
 		modelTemp = model = glm::translate(model, glm::vec3(dogPosX, dogPosY, dogPosZ));
 		modelTemp = model = glm::rotate(model, glm::radians(rotDog), glm::vec3(0.0f, 1.0f, 0.0f)); //Rotación en y
 		modelTemp = model = glm::rotate(model, glm::radians(rotDogX), glm::vec3(1.0f, 0.0f, 0.0f)); //Rotación en x 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		DogBody.Draw(lightingShader);
-		//Head
+		Galeria.Draw(lightingShader);
+		// Piso
 		model = modelTemp;
 		model = glm::translate(model, glm::vec3(0.0f, 0.093f, 0.208f));
 		model = glm::rotate(model, glm::radians(head), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		HeadDog.Draw(lightingShader);
-		//Tail 
-		model = modelTemp;
-		model = glm::translate(model, glm::vec3(0.0f, 0.026f, -0.288f));
-		model = glm::rotate(model, glm::radians(tail), glm::vec3(0.0f, 0.0f, -1.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		DogTail.Draw(lightingShader);
-		//Front Left Leg
-		model = modelTemp;
-		model = glm::translate(model, glm::vec3(0.112f, -0.044f, 0.074f));
-		model = glm::rotate(model, glm::radians(FLegsL), glm::vec3(-1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(FLegs), glm::vec3(-1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		F_LeftLeg.Draw(lightingShader);
-		//Front Right Leg
-		model = modelTemp;
-		model = glm::translate(model, glm::vec3(-0.111f, -0.055f, 0.074f));
-		model = glm::rotate(model, glm::radians(FLegsR), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(FLegs), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		F_RightLeg.Draw(lightingShader);
-		//Back Left Leg
-		model = modelTemp;
-		model = glm::translate(model, glm::vec3(0.082f, -0.046, -0.218));
-		model = glm::rotate(model, glm::radians(RLegs), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		B_LeftLeg.Draw(lightingShader);
-		//Back Right Leg
-		model = modelTemp;
-		model = glm::translate(model, glm::vec3(-0.083f, -0.057f, -0.231f));
-		model = glm::rotate(model, glm::radians(RLegs), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		B_RightLeg.Draw(lightingShader);
+		Piso.Draw(lightingShader);
+		
 
 
 		//Lámpara 1
@@ -768,14 +774,48 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.Draw(shader);
 
-		//Perro
+		// --- TORSO DEL PERRO ---
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(0.1f));
+		model = glm::scale(model, glm::vec3(0.9f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Perro.Draw(shader);
+		PerroTor.Draw(shader);
+
+		// --- CABEZA DEL PERRO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.9f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		PerroCab.Draw(shader);
+
+		// --- COLA DEL PERRO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.9f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		PerroCol.Draw(shader);
+
+		// --- PATA DELANTERA DERECHA DEL PERRO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.9f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		PerroPatFD.Draw(shader);
+
+		// --- PATA DELANTERA IZQUIERDA DEL PERRO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.9f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		PerroPatFI.Draw(shader);
+
+		// --- PATA TRASERA DERECHA DEL PERRO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.9f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		PerroPatTD.Draw(shader);
+
+		// --- PATA TRASERA IZQUIERDA DEL PERRO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.9f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		PerroPatTI.Draw(shader);
+
 
 		//Arbol 1
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(-15.0f, 0.5f, 60.0f));
@@ -845,7 +885,7 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Corpse.Draw(shader);
 
-		// --- MATRIZ BASE DEL MURCIELAGO ---
+		// --- MATRIZ BASE DEL PRIMER MURCIELAGO ---
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(batPosX, batPosY, batPosZ));
 		model = glm::rotate(model, glm::radians(batAngle), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -862,23 +902,59 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(tail));
 		BatAguja.Draw(shader);
 
-		// --- ALA DERECHA ---
-		glm::mat4 rightWing = model;
-		rightWing = glm::translate(rightWing, glm::vec3(0.35f, 0.05f, 0.0f)); // punto base del ala
-		rightWing = glm::translate(rightWing, glm::vec3(-0.35f, 0.0f, 0.0f)); // mover pivote al origen
-		rightWing = glm::rotate(rightWing, glm::radians(-wingAngle), glm::vec3(0.0f, 0.0f, 1.0f)); // rotar desde la raíz
-		rightWing = glm::translate(rightWing, glm::vec3(0.35f, 0.0f, 0.0f)); // regresar a posición original
+		// --- Ala derecha ---
+		glm::mat4 rightWing = glm::translate(model, glm::vec3(0.35f, 0.05f, 0.0f));
+		// primero abre/cierra
+		rightWing = glm::rotate(rightWing, glm::radians(-wingAngle * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// luego sube/baja un poco
+		rightWing = glm::rotate(rightWing, glm::radians(-wingAngle * 0.5f), glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(rightWing));
 		BatAlader.Draw(shader);
 
-		// --- ALA IZQUIERDA ---
-		glm::mat4 leftWing = model;
-		leftWing = glm::translate(leftWing, glm::vec3(-0.35f, 0.05f, 0.0f)); // punto base del ala
-		leftWing = glm::translate(leftWing, glm::vec3(0.35f, 0.0f, 0.0f)); // mover pivote
-		leftWing = glm::rotate(leftWing, glm::radians(wingAngle), glm::vec3(0.0f, 0.0f, 1.0f)); // rotar desde la raíz
-		leftWing = glm::translate(leftWing, glm::vec3(-0.35f, 0.0f, 0.0f)); // regresar pivote
+		// --- Ala izquierda ---
+		glm::mat4 leftWing = glm::translate(model, glm::vec3(-0.35f, 0.05f, 0.0f));
+		// abre/cierra
+		leftWing = glm::rotate(leftWing, glm::radians(wingAngle * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// sube/baja
+		leftWing = glm::rotate(leftWing, glm::radians(wingAngle * 0.4f), glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(leftWing));
 		BatAlaizq.Draw(shader);
+
+		// --- MATRIZ BASE DEL SEGUNDO MURCIELAGO ---
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(bat2PosX, bat2PosY, bat2PosZ));
+		model = glm::rotate(model, glm::radians(bat2Angle), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.2f));
+
+		// --- TORSO ---
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		BatCuerpo.Draw(shader);
+
+		// --- COLA ---
+		glm::mat4 tail2 = model;
+		tail2 = glm::translate(tail2, glm::vec3(0.0f, -0.05f, -0.20f)); // más unida al cuerpo
+		tail2 = glm::rotate(tail2, glm::radians(tailSwing), glm::vec3(0.0f, 1.0f, 0.0f)); // leve balanceo lateral
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(tail2));
+		BatAguja.Draw(shader);
+
+		// --- Ala derecha ---
+		glm::mat4 rightWing2 = glm::translate(model, glm::vec3(0.35f, 0.05f, 0.0f));
+		// primero abre/cierra
+		rightWing2 = glm::rotate(rightWing2, glm::radians(-wingAngle * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// luego sube/baja un poco
+		rightWing2 = glm::rotate(rightWing2, glm::radians(-wingAngle * 0.5f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(rightWing2));
+		BatAlader.Draw(shader);
+
+		// --- Ala izquierda ---
+		glm::mat4 leftWing2 = glm::translate(model, glm::vec3(-0.35f, 0.05f, 0.0f));
+		// abre/cierra
+		leftWing2 = glm::rotate(leftWing2, glm::radians(wingAngle * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// sube/baja
+		leftWing2 = glm::rotate(leftWing2, glm::radians(wingAngle * 0.4f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(leftWing2));
+		BatAlaizq.Draw(shader);
+
 
 
 		// Sofa 1
@@ -1014,7 +1090,7 @@ int main()
 		model = glm::rotate(model, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0); //activa o desactiva la transparencia, si se desactiva el interior de la galeria se vera negro
-		Ball.Draw(lightingShader);
+		//Ball.Draw(lightingShader);
 
 		// Restaura configuración normal
 		glDisable(GL_BLEND);
