@@ -758,6 +758,10 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso.Draw(lightingShader);
 		
+		// --- ACTIVAR 'shader' (modelLoading) Y CARGAR MATRICES ---
+		shader.Use();
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 
 		//Lámpara 1
@@ -834,7 +838,7 @@ int main()
 		model = glm::scale(model, glm::vec3(0.05f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Arbol.Draw(shader);
-
+		
 		//Arbol 3
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, -50.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -999,6 +1003,10 @@ int main()
 		model = glm::scale(model, glm::vec3(0.05f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Mesa.Draw(shader);
+		// --- VOLVER A 'lightingShader' Y CARGAR MATRICES ---
+		lightingShader.Use();
+		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		// ===== PERSONA (torso como base/padre) =====
 		glm::mat4 personaBase = glm::mat4(1.0f);
@@ -1148,7 +1156,7 @@ int main()
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
 	glDeleteVertexArrays(1, &skyBoxVAO);
-	glDeleteBuffers(1, &skyBoxVAO);
+	glDeleteBuffers(1, &skyBoxVBO);
 
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
