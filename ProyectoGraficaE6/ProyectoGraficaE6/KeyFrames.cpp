@@ -7,9 +7,10 @@ Fecha de entrega 12 de Noviembre del 2025
  */
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 
- // GLEW
+// GLEW
 #include <GL/glew.h>
 
 // GLFW
@@ -136,6 +137,14 @@ bool wingUp = true;
 float tailSwing = 0.5f;
 int batDirection = 1;
 
+// ---- Persona (variables propias) ----
+float perPosX = 0.0f, perPosY = 0.0f, perPosZ = 0.0f;  // posición de la persona
+float perRotY = 0.0f, perRotX = 0.0f;                  // yaw/pitch del torso
+float perHead = 0.0f;   // cabeza
+float perArmL = 0.0f;   // hombro izquierdo
+float perArmR = 0.0f;   // hombro derecho
+float perLegL = 0.0f;   // muslo izquierdo
+float perLegR = 0.0f;   // muslo derecho
 
 //KeyFrames
 float dogPosX, dogPosY, dogPosZ;
@@ -244,41 +253,70 @@ void PrintAnimation(const char* filename = "Animacion.txt") {
 
 void saveFrame(void)
 {
-
 	printf("frameindex %d\n", FrameIndex);
+	KeyFrame[FrameIndex].dogPosX = perPosX;
+	KeyFrame[FrameIndex].dogPosY = perPosY;
+	KeyFrame[FrameIndex].dogPosZ = perPosZ;
 
-	KeyFrame[FrameIndex].dogPosX = dogPosX;
-	KeyFrame[FrameIndex].dogPosY = dogPosY;
-	KeyFrame[FrameIndex].dogPosZ = dogPosZ;
+	KeyFrame[FrameIndex].rotDog = perRotY;   // yaw torso
+	KeyFrame[FrameIndex].rotDogX = perRotX;   // pitch torso
 
-	KeyFrame[FrameIndex].rotDog = rotDog;
-	KeyFrame[FrameIndex].rotDogX = rotDogX;
-
-	KeyFrame[FrameIndex].head = head;
-	KeyFrame[FrameIndex].tail = tail;
-	KeyFrame[FrameIndex].FLegs = FLegs;
-	KeyFrame[FrameIndex].FLegsL = FLegsL;
-	KeyFrame[FrameIndex].FLegsR = FLegsR;
-	KeyFrame[FrameIndex].RLegs = RLegs;
+	KeyFrame[FrameIndex].head = perHead;
+	KeyFrame[FrameIndex].tail = 0.0f;       // no usado en persona
+	KeyFrame[FrameIndex].FLegs = 0.0f;       // no usado (o úsalo si quieres)
+	KeyFrame[FrameIndex].FLegsL = perArmL;
+	KeyFrame[FrameIndex].FLegsR = perArmR;
+	KeyFrame[FrameIndex].RLegs = 0.0f;       // puedes mapear a piernas si lo deseas
 
 	FrameIndex++;
+
+	
+
+	//KeyFrame[FrameIndex].dogPosX = dogPosX;
+	//KeyFrame[FrameIndex].dogPosY = dogPosY;
+	//KeyFrame[FrameIndex].dogPosZ = dogPosZ;
+
+	//KeyFrame[FrameIndex].rotDog = rotDog;
+	//KeyFrame[FrameIndex].rotDogX = rotDogX;
+
+	//KeyFrame[FrameIndex].head = head;
+	//KeyFrame[FrameIndex].tail = tail;
+	//KeyFrame[FrameIndex].FLegs = FLegs;
+	//KeyFrame[FrameIndex].FLegsL = FLegsL;
+	//KeyFrame[FrameIndex].FLegsR = FLegsR;
+	//KeyFrame[FrameIndex].RLegs = RLegs;
+
+	//FrameIndex++;
 }
 
 void resetElements(void)
 {
-	dogPosX = KeyFrame[0].dogPosX;
-	dogPosY = KeyFrame[0].dogPosY;
-	dogPosZ = KeyFrame[0].dogPosZ;
+	perPosX = KeyFrame[0].dogPosX;
+	perPosY = KeyFrame[0].dogPosY;
+	perPosZ = KeyFrame[0].dogPosZ;
 
-	head = KeyFrame[0].head;
-	tail = KeyFrame[0].tail;
-	FLegs = KeyFrame[0].FLegs;
-	FLegsL = KeyFrame[0].FLegsL;
-	FLegsR = KeyFrame[0].FLegsR;
-	RLegs = KeyFrame[0].RLegs;
+	perHead = KeyFrame[0].head;
+	perArmL = KeyFrame[0].FLegsL;
+	perArmR = KeyFrame[0].FLegsR;
+	perLegL = 0.0f;
+	perLegR = 0.0f;
 
-	rotDog = KeyFrame[0].rotDog;
-	rotDogX = KeyFrame[0].rotDogX;
+	perRotY = KeyFrame[0].rotDog;
+	perRotX = KeyFrame[0].rotDogX;
+
+	//dogPosX = KeyFrame[0].dogPosX;
+	//dogPosY = KeyFrame[0].dogPosY;
+	//dogPosZ = KeyFrame[0].dogPosZ;
+
+	//head = KeyFrame[0].head;
+	//tail = KeyFrame[0].tail;
+	//FLegs = KeyFrame[0].FLegs;
+	//FLegsL = KeyFrame[0].FLegsL;
+	//FLegsR = KeyFrame[0].FLegsR;
+	//RLegs = KeyFrame[0].RLegs;
+
+	//rotDog = KeyFrame[0].rotDog;
+	//rotDogX = KeyFrame[0].rotDogX;
 
 }
 void interpolation(void)
@@ -380,7 +418,7 @@ int main()
 	Model Ritual((char*)"Models/Interior/ritual.obj");
 	Model Corpse((char*)"Models/Interior/corpse.obj");
 
-
+	//Murcielago
 	Model BatAguja((char*)"Models/Exterior/Murcielago/Aguja.obj");
 	Model BatAlader((char*)"Models/Exterior/Murcielago/Alader.obj");
 	Model BatAlaizq((char*)"Models/Exterior/Murcielago/Alaizq.obj");
@@ -390,6 +428,18 @@ int main()
 	Model Sofa((char*)"Models/Interior/sofa.obj");
 	Model Recepcion((char*)"Models/Interior/recepcion.obj");
 	Model Mesa((char*)"Models/Exterior/picnic_table.obj");
+
+	// Persona (partes) 
+	Model Ptorso((char*)"Models/Galeria/Persona/Ptorso.obj");
+	Model Pcabeza((char*)"Models/Galeria/Persona/Pcabeza.obj");
+	Model Phombroizq((char*)"Models/Galeria/Persona/Phombroizq.obj");
+	Model Phombroder((char*)"Models/Galeria/Persona/Phombroder.obj");
+	Model Pantebrasizq((char*)"Models/Galeria/Persona/Pantebrasizq.obj");
+	Model Pantebrasder((char*)"Models/Galeria/Persona/Pantebrasder.obj");
+	Model Pmusloizq((char*)"Models/Galeria/Persona/Pmusloizq.obj");
+	Model Pmusloder((char*)"Models/Galeria/Persona/Pmusloder.obj");
+	Model Prodillaizq((char*)"Models/Galeria/Persona/Prodillaizq.obj");
+	Model Prodillader((char*)"Models/Galeria/Persona/Prodillader.obj");
 
 
 
@@ -546,7 +596,7 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 		Animation();
-
+		
 
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -874,6 +924,86 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Mesa.Draw(shader);
 
+		// ===== PERSONA (torso como base/padre) =====
+		glm::mat4 personaBase = glm::mat4(1.0f);
+		personaBase = glm::translate(personaBase, glm::vec3(perPosX, perPosY, perPosZ));
+		personaBase = glm::rotate(personaBase, glm::radians(perRotY), glm::vec3(0, 1, 0));
+		personaBase = glm::rotate(personaBase, glm::radians(perRotX), glm::vec3(1, 0, 0));
+		personaBase = glm::scale(personaBase, glm::vec3(0.5f));   // ajusta a tu escala
+
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(personaBase));
+		Ptorso.Draw(lightingShader);
+
+		// Cabeza
+		{
+			glm::mat4 m = personaBase;
+			// m = glm::translate(m, glm::vec3(0.0f, /*offsetY*/, /*offsetZ*/));
+			m = glm::rotate(m, glm::radians(perHead), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Pcabeza.Draw(lightingShader);
+		}
+
+		// Hombro izquierdo
+		{
+			glm::mat4 m = personaBase;
+			// m = glm::translate(m, glm::vec3(/*offset hombro izq*/));
+			m = glm::rotate(m, glm::radians(perArmL), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Phombroizq.Draw(lightingShader);
+		}
+
+		// Hombro derecho
+		{
+			glm::mat4 m = personaBase;
+			// m = glm::translate(m, glm::vec3(/*offset hombro der*/));
+			m = glm::rotate(m, glm::radians(perArmR), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Phombroder.Draw(lightingShader);
+		}
+
+		// Antebrazo izq (fijo por ahora)
+		{
+			glm::mat4 m = personaBase;
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Pantebrasizq.Draw(lightingShader);
+		}
+
+		// Antebrazo der (fijo por ahora)
+		{
+			glm::mat4 m = personaBase;
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Pantebrasder.Draw(lightingShader);
+		}
+
+		// Muslo izquierdo
+		{
+			glm::mat4 m = personaBase;
+			// m = glm::translate(m, glm::vec3(/*offset cadera izq*/));
+			m = glm::rotate(m, glm::radians(perLegL), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Pmusloizq.Draw(lightingShader);
+		}
+
+		// Muslo derecho
+		{
+			glm::mat4 m = personaBase;
+			// m = glm::translate(m, glm::vec3(/*offset cadera der*/));
+			m = glm::rotate(m, glm::radians(perLegR), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Pmusloder.Draw(lightingShader);
+		}
+
+		// Rodillas (fijas por ahora)
+		{
+			glm::mat4 m = personaBase;
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Prodillaizq.Draw(lightingShader);
+		}
+		{
+			glm::mat4 m = personaBase;
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
+			Prodillader.Draw(lightingShader);
+		}
 
 
 
@@ -955,47 +1085,81 @@ int main()
 // Moves/alters the camera positions based on user input
 void DoMovement()
 {
-	//Dog Controls
-	if (keys[GLFW_KEY_1])
-	{
-		angle += speed;  // Incrementa el ángulo para el movimiento circular
-		//dogPosX = radio * cos(angle); // Posición en X
-		//dogPosZ = radio * sin(angle); // Posición en Z
-		rotDog += 0.05f;
-		FLegs = 15.0f * sin(rotDog * 0.05f); // Mueve las patas delanteras
-		RLegs = 15.0f * sin(rotDog * 0.05f);  // Mueve las patas traseras
-		// Mantener circularAngle en el rango [0, 2π]
-		if (angle > 2 * 3.15) {
-			angle -= 2 * 3.15;
-		}
+	////Dog Controls
+	//if (keys[GLFW_KEY_1])
+	//{
+	//	angle += speed;  // Incrementa el ángulo para el movimiento circular
+	//	//dogPosX = radio * cos(angle); // Posición en X
+	//	//dogPosZ = radio * sin(angle); // Posición en Z
+	//	rotDog += 0.05f;
+	//	FLegs = 15.0f * sin(rotDog * 0.05f); // Mueve las patas delanteras
+	//	RLegs = 15.0f * sin(rotDog * 0.05f);  // Mueve las patas traseras
+	//	// Mantener circularAngle en el rango [0, 2π]
+	//	if (angle > 2 * 3.15) {
+	//		angle -= 2 * 3.15;
+	//	}
+	//}
+
+	//if (keys[GLFW_KEY_2]) rotDogX += 0.1f;
+	//if (keys[GLFW_KEY_3]) rotDogX -= 0.1f;
+
+	//if (keys[GLFW_KEY_4]) head += 0.1f;
+	//if (keys[GLFW_KEY_5]) head -= 0.1f;
+
+	//if (keys[GLFW_KEY_6]) tail += 0.1f;
+	//if (keys[GLFW_KEY_7]) tail -= 0.1f;
+
+	//if (keys[GLFW_KEY_8]) RLegs += 0.1f;
+	//if (keys[GLFW_KEY_9]) RLegs -= 0.1f;
+
+	//if (keys[GLFW_KEY_Z]) FLegsL += 0.1f;
+	//if (keys[GLFW_KEY_X]) FLegsL -= 0.1f;
+
+	//if (keys[GLFW_KEY_M]) FLegsR += 0.1f;
+	//if (keys[GLFW_KEY_N]) FLegsR -= 0.1f;
+
+	//if (keys[GLFW_KEY_H]) dogPosZ += 0.001;
+	//if (keys[GLFW_KEY_Y]) dogPosZ -= 0.001;
+
+	//if (keys[GLFW_KEY_G]) dogPosX -= 0.001;
+	//if (keys[GLFW_KEY_J]) dogPosX += 0.001;
+
+	//if (keys[GLFW_KEY_C]) dogPosY -= 0.001;
+	//if (keys[GLFW_KEY_V]) dogPosY += 0.001;
+
+	// ===== Controles PERSONA =====
+	if (keys[GLFW_KEY_1]) { // caminar simple con balanceo
+		perRotY += 0.05f;
+		float osc = 15.0f * sin(perRotY * 0.05f);
+		perArmL = osc;
+		perArmR = -osc;
+		perLegL = -osc;
+		perLegR = osc;
 	}
 
-	if (keys[GLFW_KEY_2]) rotDogX += 0.1f;
-	if (keys[GLFW_KEY_3]) rotDogX -= 0.1f;
+	if (keys[GLFW_KEY_2]) perRotX += 0.1f;
+	if (keys[GLFW_KEY_3]) perRotX -= 0.1f;
 
-	if (keys[GLFW_KEY_4]) head += 0.1f;
-	if (keys[GLFW_KEY_5]) head -= 0.1f;
+	if (keys[GLFW_KEY_4]) perHead += 0.1f;
+	if (keys[GLFW_KEY_5]) perHead -= 0.1f;
 
-	if (keys[GLFW_KEY_6]) tail += 0.1f;
-	if (keys[GLFW_KEY_7]) tail -= 0.1f;
+	if (keys[GLFW_KEY_Z]) perArmL += 0.1f;
+	if (keys[GLFW_KEY_X]) perArmL -= 0.1f;
 
-	if (keys[GLFW_KEY_8]) RLegs += 0.1f;
-	if (keys[GLFW_KEY_9]) RLegs -= 0.1f;
+	if (keys[GLFW_KEY_M]) perArmR += 0.1f;
+	if (keys[GLFW_KEY_N]) perArmR -= 0.1f;
 
-	if (keys[GLFW_KEY_Z]) FLegsL += 0.1f;
-	if (keys[GLFW_KEY_X]) FLegsL -= 0.1f;
+	// piernas (ajústales teclas si quieres independientes)
+	if (keys[GLFW_KEY_8]) perLegL += 0.1f;
+	if (keys[GLFW_KEY_9]) perLegL -= 0.1f;
 
-	if (keys[GLFW_KEY_M]) FLegsR += 0.1f;
-	if (keys[GLFW_KEY_N]) FLegsR -= 0.1f;
+	if (keys[GLFW_KEY_H]) perPosZ += 0.001f;
+	if (keys[GLFW_KEY_Y]) perPosZ -= 0.001f;
+	if (keys[GLFW_KEY_G]) perPosX -= 0.001f;
+	if (keys[GLFW_KEY_J]) perPosX += 0.001f;
+	if (keys[GLFW_KEY_C]) perPosY -= 0.001f;
+	if (keys[GLFW_KEY_V]) perPosY += 0.001f;
 
-	if (keys[GLFW_KEY_H]) dogPosZ += 0.001;
-	if (keys[GLFW_KEY_Y]) dogPosZ -= 0.001;
-
-	if (keys[GLFW_KEY_G]) dogPosX -= 0.001;
-	if (keys[GLFW_KEY_J]) dogPosX += 0.001;
-
-	if (keys[GLFW_KEY_C]) dogPosY -= 0.001;
-	if (keys[GLFW_KEY_V]) dogPosY += 0.001;
 
 	// Camera controls
 	if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])
@@ -1153,19 +1317,31 @@ void Animation() {
 		}
 		else
 		{
-			//Draw animation
-			dogPosX += KeyFrame[playIndex].incX;
-			dogPosY += KeyFrame[playIndex].incY;
-			dogPosZ += KeyFrame[playIndex].incZ;
-			head += KeyFrame[playIndex].headInc;
-			tail += KeyFrame[playIndex].tailInc;
-			FLegsL += KeyFrame[playIndex].FLegsLInc;
-			FLegsR += KeyFrame[playIndex].FLegsRInc;
-			RLegs += KeyFrame[playIndex].RLegsInc;
-			FLegs += KeyFrame[playIndex].FLegsInc;
-			rotDog += KeyFrame[playIndex].rotDogInc;
-			rotDogX += KeyFrame[playIndex].rotDogXInc;
+			////Draw animation
+			//dogPosX += KeyFrame[playIndex].incX;
+			//dogPosY += KeyFrame[playIndex].incY;
+			//dogPosZ += KeyFrame[playIndex].incZ;
+			//head += KeyFrame[playIndex].headInc;
+			//tail += KeyFrame[playIndex].tailInc;
+			//FLegsL += KeyFrame[playIndex].FLegsLInc;
+			//FLegsR += KeyFrame[playIndex].FLegsRInc;
+			//RLegs += KeyFrame[playIndex].RLegsInc;
+			//FLegs += KeyFrame[playIndex].FLegsInc;
+			//rotDog += KeyFrame[playIndex].rotDogInc;
+			//rotDogX += KeyFrame[playIndex].rotDogXInc;
 
+			//i_curr_steps++;
+			perPosX += KeyFrame[playIndex].incX;
+			perPosY += KeyFrame[playIndex].incY;
+			perPosZ += KeyFrame[playIndex].incZ;
+
+			perHead += KeyFrame[playIndex].headInc;
+			perArmL += KeyFrame[playIndex].FLegsLInc;
+			perArmR += KeyFrame[playIndex].FLegsRInc;
+			// Si no usas piernas en KF, ignora RLegsInc/FLegsInc
+
+			perRotY += KeyFrame[playIndex].rotDogInc;
+			perRotX += KeyFrame[playIndex].rotDogXInc;
 			i_curr_steps++;
 		}
 
