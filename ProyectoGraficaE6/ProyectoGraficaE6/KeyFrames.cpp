@@ -9,7 +9,7 @@ Fecha de entrega 12 de Noviembre del 2025
 #include <cmath>
 
 
-// GLEW
+ // GLEW
 #include <GL/glew.h>
 
 // GLFW
@@ -390,7 +390,7 @@ int main()
 	Model Sofa((char*)"Models/Interior/sofa.obj");
 	Model Recepcion((char*)"Models/Interior/recepcion.obj");
 	Model Mesa((char*)"Models/Exterior/picnic_table.obj");
-	
+
 
 
 
@@ -546,7 +546,7 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 		Animation();
-		
+
 
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -874,7 +874,7 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Mesa.Draw(shader);
 
-		
+
 
 
 		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
