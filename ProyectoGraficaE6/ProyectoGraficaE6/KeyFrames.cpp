@@ -8,7 +8,10 @@ Fecha de entrega 12 de Noviembre del 2025
 #include <iostream>
 #include <cmath>
 #include <fstream>
-
+ // --- Audio ---
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
+// ---
 
 // GLEW
 #include <GL/glew.h>
@@ -52,6 +55,13 @@ GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
+
+// --- Variables Globales de Audio ---
+ma_engine audio_engine; // El motor principal de audio
+ma_sound bgm_sound;     // Sonido específico para música de fondo (para poder hacer loop)
+ma_sound steps_sound;
+// 
+// 
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 bool active;
@@ -398,7 +408,10 @@ int main()
 		std::cout << "Failed to initialize GLEW" << std::endl;
 		return EXIT_FAILURE;
 	}
-
+	if (ma_engine_init(NULL, &audio_engine) != MA_SUCCESS) {
+		std::cout << "Error al inicializar el motor de audio." << std::endl;
+		return -1;
+	}
 	// Define the viewport dimensions
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -592,7 +605,18 @@ int main()
 
 	GLuint cubemapTexture = TextureLoading::LoadCubemap(faces);
 	/////////////////////////////////////////////////////////
-
+	ma_result result = ma_sound_init_from_file(&audio_engine, "Audio/Fondo.mp3", 0, NULL, NULL, &bgm_sound);
+	if (result == MA_SUCCESS) {
+		ma_sound_set_looping(&bgm_sound, MA_TRUE); // Activar loop
+		ma_sound_set_volume(&bgm_sound, 0.5f);     // Ajustar volumen (0.0 a 1.0)
+		ma_sound_start(&bgm_sound);                // Iniciar reproducción
+	}
+	result = ma_sound_init_from_file(&audio_engine, "Audio/pasos.mp3", 0, NULL, NULL, &steps_sound);
+	if (result == MA_SUCCESS) {
+		ma_sound_set_looping(&steps_sound, MA_TRUE); // Importante: que se repita mientras caminas
+		ma_sound_set_volume(&steps_sound, 1.0f);     // Ajusta el volumen si es necesario
+		// NO lo iniciamos aquí con ma_sound_start, esperaremos a movernos
+	}
 	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 100.0f);
 
 	// Game loop
@@ -1157,7 +1181,8 @@ int main()
 	glDeleteBuffers(1, &EBO);
 	glDeleteVertexArrays(1, &skyBoxVAO);
 	glDeleteBuffers(1, &skyBoxVBO);
-
+	ma_sound_uninit(&bgm_sound);
+	ma_engine_uninit(&audio_engine);
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
 
@@ -1246,31 +1271,47 @@ void DoMovement()
 
 
 	// Camera controls
+	bool isMoving = false;
 	if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])
 	{
 		camera.ProcessKeyboard(FORWARD, deltaTime);
-
+		isMoving = true;
 	}
 
 	if (keys[GLFW_KEY_S] || keys[GLFW_KEY_DOWN])
 	{
 		camera.ProcessKeyboard(BACKWARD, deltaTime);
-
-
+		isMoving = true;
 	}
 
 	if (keys[GLFW_KEY_A] || keys[GLFW_KEY_LEFT])
 	{
 		camera.ProcessKeyboard(LEFT, deltaTime);
-
-
+		isMoving = true;
 	}
 
 	if (keys[GLFW_KEY_D] || keys[GLFW_KEY_RIGHT])
 	{
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+		isMoving = true;
+	}
 
-
+	// --- Lógica de Audio de Pasos ---
+	if (isMoving)
+	{
+		// Si nos estamos moviendo y el sonido NO está sonando, lo iniciamos
+		if (!ma_sound_is_playing(&steps_sound))
+		{
+			ma_sound_start(&steps_sound);
+		}
+	}
+	else
+	{
+		// Si NO nos estamos moviendo y el sonido SÍ está sonando, lo detenemos
+		if (ma_sound_is_playing(&steps_sound))
+		{
+			ma_sound_stop(&steps_sound);
+		}
 	}
 
 	if (keys[GLFW_KEY_T])
