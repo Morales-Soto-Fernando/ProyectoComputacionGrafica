@@ -761,6 +761,7 @@ int main()
 		if (wingAngle2 > 1.5f) wingUp2 = false;
 		if (wingAngle2 < -1.5f) wingUp2 = true;
 
+		
 
 
 		// Carga de modelo 
@@ -782,11 +783,6 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso.Draw(lightingShader);
 		
-		// --- ACTIVAR 'shader' (modelLoading) Y CARGAR MATRICES ---
-		shader.Use();
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
 
 		//Lámpara 1
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(35.0f, -1.0f, 10.0f));
@@ -983,8 +979,6 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(leftWing2));
 		BatAlaizq.Draw(shader);
 
-
-
 		// Sofa 1
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(15.0f, 0.5f, 52.5f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1027,92 +1021,66 @@ int main()
 		model = glm::scale(model, glm::vec3(0.05f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Mesa.Draw(shader);
-		// --- VOLVER A 'lightingShader' Y CARGAR MATRICES ---
-		lightingShader.Use();
-		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		// ===== PERSONA (torso como base/padre) =====
-		glm::mat4 personaBase = glm::mat4(1.0f);
-		personaBase = glm::translate(personaBase, glm::vec3(perPosX, perPosY, perPosZ));
-		personaBase = glm::rotate(personaBase, glm::radians(perRotY), glm::vec3(0, 1, 0));
-		personaBase = glm::rotate(personaBase, glm::radians(perRotX), glm::vec3(1, 0, 0));
-		personaBase = glm::scale(personaBase, glm::vec3(0.5f));   // ajusta a tu escala
+		// --- TORSO DE LA PERSONA --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f)); 
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Ptorso.Draw(shader);
+	
+		// --- CABEZA DE LA PERSONA --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f)); 
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		Pcabeza.Draw(shader);
 
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(personaBase));
-		Ptorso.Draw(lightingShader);
+		// --- HOMBRO IZQUIERDO --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f)); 
+		model = glm::scale(model, glm::vec3(0.5f)); 
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		Phombroizq.Draw(shader);
 
-		// Cabeza
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(0.0f, /*offsetY*/, /*offsetZ*/));
-			m = glm::rotate(m, glm::radians(perHead), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pcabeza.Draw(lightingShader);
-		}
+		// --- HOMBRO DERECHO --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f)); 
+		model = glm::scale(model, glm::vec3(0.5f)); 
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Phombroder.Draw(shader);
 
-		// Hombro izquierdo
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(/*offset hombro izq*/));
-			m = glm::rotate(m, glm::radians(perArmL), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Phombroizq.Draw(lightingShader);
-		}
+		// --- ANTEBRAZO IZQUIERDO --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f)); 
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Pantebrasizq.Draw(shader);
 
-		// Hombro derecho
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(/*offset hombro der*/));
-			m = glm::rotate(m, glm::radians(perArmR), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Phombroder.Draw(lightingShader);
-		}
+		// --- ANTEBRAZO DERECHO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.5f)); 
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		Pantebrasder.Draw(shader);
 
-		// Antebrazo izq (fijo por ahora)
-		{
-			glm::mat4 m = personaBase;
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pantebrasizq.Draw(lightingShader);
-		}
+		// --- MUSLO IZQUIERDO--- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.5f)); 
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Pmusloizq.Draw(shader);
 
-		// Antebrazo der (fijo por ahora)
-		{
-			glm::mat4 m = personaBase;
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pantebrasder.Draw(lightingShader);
-		}
+		// --- MUSLO DERECHO --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f)); 
+		model = glm::scale(model, glm::vec3(0.5f)); 
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		Pmusloder.Draw(shader);
 
-		// Muslo izquierdo
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(/*offset cadera izq*/));
-			m = glm::rotate(m, glm::radians(perLegL), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pmusloizq.Draw(lightingShader);
-		}
+		// --- RODILLA IZQUIERDA --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f)); 
+		model = glm::scale(model, glm::vec3(0.5f)); 
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		Prodillaizq.Draw(shader);
 
-		// Muslo derecho
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(/*offset cadera der*/));
-			m = glm::rotate(m, glm::radians(perLegR), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pmusloder.Draw(lightingShader);
-		}
-
-		// Rodillas (fijas por ahora)
-		{
-			glm::mat4 m = personaBase;
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Prodillaizq.Draw(lightingShader);
-		}
-		{
-			glm::mat4 m = personaBase;
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Prodillader.Draw(lightingShader);
-		}
-
+		// --- RODILLA DERECHA --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.5f, 60.0f));
+		model = glm::scale(model, glm::vec3(0.5f)); 
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		Prodillader.Draw(shader);
 
 
 		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
