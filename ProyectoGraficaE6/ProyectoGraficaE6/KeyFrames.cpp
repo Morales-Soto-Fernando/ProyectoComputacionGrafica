@@ -156,8 +156,6 @@ float bat2Angle = 0.0f;
 float wingAngle2 = 0.0f;
 bool wingUp2 = true;
 
-
-
 // ---- Persona (variables propias) ----
 float perPosX = 0.0f, perPosY = 0.0f, perPosZ = 0.0f;  // posición de la persona
 float perRotY = 0.0f, perRotX = 0.0f;                  // yaw/pitch del torso
@@ -325,19 +323,19 @@ void resetElements(void)
 	perRotY = KeyFrame[0].rotDog;
 	perRotX = KeyFrame[0].rotDogX;
 
-	//dogPosX = KeyFrame[0].dogPosX;
-	//dogPosY = KeyFrame[0].dogPosY;
-	//dogPosZ = KeyFrame[0].dogPosZ;
+	dogPosX = KeyFrame[0].dogPosX;
+	dogPosY = KeyFrame[0].dogPosY;
+	dogPosZ = KeyFrame[0].dogPosZ;
 
-	//head = KeyFrame[0].head;
-	//tail = KeyFrame[0].tail;
-	//FLegs = KeyFrame[0].FLegs;
-	//FLegsL = KeyFrame[0].FLegsL;
-	//FLegsR = KeyFrame[0].FLegsR;
-	//RLegs = KeyFrame[0].RLegs;
+	head = KeyFrame[0].head;
+	tail = KeyFrame[0].tail;
+	FLegs = KeyFrame[0].FLegs;
+	FLegsL = KeyFrame[0].FLegsL;
+	FLegsR = KeyFrame[0].FLegsR;
+	RLegs = KeyFrame[0].RLegs;
 
-	//rotDog = KeyFrame[0].rotDog;
-	//rotDogX = KeyFrame[0].rotDogX;
+	rotDog = KeyFrame[0].rotDog;
+	rotDogX = KeyFrame[0].rotDogX;
 
 }
 void interpolation(void)
@@ -675,6 +673,26 @@ int main()
 	Model Prodillaizq((char*)"Models/Galeria/Persona/Prodillaizq.obj");
 	Model Prodillader((char*)"Models/Galeria/Persona/Prodillader.obj");
 
+	// Escultura
+	Model Viecab((char*)"Models/Galeria/Escultura/viejocabeza.obj");
+	Model Vietor((char*)"Models/Galeria/Escultura/viejotorso.obj");
+	Model Vieanbder((char*)"Models/Galeria/Escultura/viejoantebrader.obj");
+	Model Vieanbizq((char*)"Models/Galeria/Escultura/viejoantebrazoizq.obj");
+	Model Viebrader((char*)"Models/Galeria/Escultura/viejobrazoder.obj");
+	Model Viebraizq((char*)"Models/Galeria/Escultura/viejobrazoizq.obj");
+	Model Viemusder((char*)"Models/Galeria/Escultura/viejomusloder.obj");
+	Model Viemusizq((char*)"Models/Galeria/Escultura/viejomusloizq.obj");
+	Model Viepieder((char*)"Models/Galeria/Escultura/viejopiernader.obj");
+	Model Viepieizq((char*)"Models/Galeria/Escultura/viejopiernaizq.obj");
+
+	// Esqueleto
+	Model Etorso((char*)"Models/Galeria/Esqueleto/Etorso.obj");
+	Model Ecabeza((char*)"Models/Galeria/Esqueleto/Ecabeza.obj");
+	Model Ebrader((char*)"Models/Galeria/Esqueleto/Ebrasoder.obj");
+	Model Ebraizq((char*)"Models/Galeria/Esqueleto/Ebrasoizq.obj");
+	Model Epelvis((char*)"Models/Galeria/Esqueleto/Epelvis.obj");
+	Model Epieder((char*)"Models/Galeria/Esqueleto/Epiernader.obj");
+	Model Epieizq((char*)"Models/Galeria/Esqueleto/Epiernaizq.obj");
 
 
 
@@ -1283,91 +1301,195 @@ int main()
 		model = glm::scale(model, glm::vec3(0.05f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Mesa.Draw(shader);
+
+
 		// --- VOLVER A 'lightingShader' Y CARGAR MATRICES ---
 		lightingShader.Use();
 		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		// ===== PERSONA (torso como base/padre) =====
-		glm::mat4 personaBase = glm::mat4(1.0f);
-		personaBase = glm::translate(personaBase, glm::vec3(perPosX, perPosY, perPosZ));
-		personaBase = glm::rotate(personaBase, glm::radians(perRotY), glm::vec3(0, 1, 0));
-		personaBase = glm::rotate(personaBase, glm::radians(perRotX), glm::vec3(1, 0, 0));
-		personaBase = glm::scale(personaBase, glm::vec3(0.5f));   // ajusta a tu escala
 
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(personaBase));
-		Ptorso.Draw(lightingShader);
+		// --- TORSO DE LA PERSONA --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f)); 
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		Ptorso.Draw(shader);
 
-		// Cabeza
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(0.0f, /*offsetY*/, /*offsetZ*/));
-			m = glm::rotate(m, glm::radians(perHead), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pcabeza.Draw(lightingShader);
-		}
+		//--- CABEZA DE LA PERSONA --- 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f)); 
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
+		model = glm::scale(model, glm::vec3(0.4f)); 
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		Pcabeza.Draw(shader);
 
-		// Hombro izquierdo
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(/*offset hombro izq*/));
-			m = glm::rotate(m, glm::radians(perArmL), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Phombroizq.Draw(lightingShader);
-		}
+		// --- HOMBRO IZQUIERDO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Phombroizq.Draw(shader);
 
-		// Hombro derecho
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(/*offset hombro der*/));
-			m = glm::rotate(m, glm::radians(perArmR), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Phombroder.Draw(lightingShader);
-		}
+		// --- HOMBRO DERECHO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Phombroder.Draw(shader);
 
-		// Antebrazo izq (fijo por ahora)
-		{
-			glm::mat4 m = personaBase;
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pantebrasizq.Draw(lightingShader);
-		}
+		// --- ANTEBRAZO IZQUIERDO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Pantebrasizq.Draw(shader);
 
-		// Antebrazo der (fijo por ahora)
-		{
-			glm::mat4 m = personaBase;
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pantebrasder.Draw(lightingShader);
-		}
+		// --- ANTEBRAZO DERECHO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Pantebrasder.Draw(shader);
 
-		// Muslo izquierdo
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(/*offset cadera izq*/));
-			m = glm::rotate(m, glm::radians(perLegL), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pmusloizq.Draw(lightingShader);
-		}
+		// --- MUSLO IZQUIERDO---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Pmusloizq.Draw(shader);
 
-		// Muslo derecho
-		{
-			glm::mat4 m = personaBase;
-			// m = glm::translate(m, glm::vec3(/*offset cadera der*/));
-			m = glm::rotate(m, glm::radians(perLegR), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Pmusloder.Draw(lightingShader);
-		}
+		// --- MUSLO DERECHO ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Pmusloder.Draw(shader);
 
-		// Rodillas (fijas por ahora)
-		{
-			glm::mat4 m = personaBase;
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Prodillaizq.Draw(lightingShader);
-		}
-		{
-			glm::mat4 m = personaBase;
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(m));
-			Prodillader.Draw(lightingShader);
-		}
+		// --- RODILLA IZQUIERDA ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Prodillaizq.Draw(shader);
+
+		// --- RODILLA DERECHA ---
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Prodillader.Draw(shader);
+
+
+        // Escultura torso
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Vietor.Draw(shader);
+
+		// Escultura cabeza
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Viecab.Draw(shader);
+
+		// Escultura brazo izquierdo
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Viebraizq.Draw(shader);
+
+		// Escultura brazo derecho
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Viebrader.Draw(shader);
+
+		// Escultura antebrazo izquierdo
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Vieanbizq.Draw(shader);
+
+		// Escultura antebrazo derecho
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Vieanbder.Draw(shader);
+
+		// Escultura muslo izquierdo
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Viemusizq.Draw(shader);
+
+		// Escultura muslo derecho
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Viemusder.Draw(shader);
+
+		// Escultura pierna izquierda
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Viepieizq.Draw(shader);
+
+		// Escultura pierna derecha
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
+		model = glm::scale(model, glm::vec3(0.8f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Viepieder.Draw(shader);
+
+		// Esqueleto cabeza
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Ecabeza.Draw(shader);
+
+		// Esqueleto torso
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Etorso.Draw(shader);
+
+		// Esqueleto brazo derecho
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Ebrader.Draw(shader);
+
+		// Esqueleto brazo izquierdo
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Ebraizq.Draw(shader);
+
+		// Esqueleto pelvis
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Epelvis.Draw(shader);
+
+		// Esqueleto pierna derecha
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Epieder.Draw(shader);
+
+		// Esqueleto pierna izquierda
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		Epieizq.Draw(shader);
+
+
 
 
 
@@ -1453,80 +1575,80 @@ int main()
 // Moves/alters the camera positions based on user input
 void DoMovement()
 {
-	////Dog Controls
-	//if (keys[GLFW_KEY_1])
-	//{
-	//	angle += speed;  // Incrementa el ángulo para el movimiento circular
-	//	//dogPosX = radio * cos(angle); // Posición en X
-	//	//dogPosZ = radio * sin(angle); // Posición en Z
-	//	rotDog += 0.05f;
-	//	FLegs = 15.0f * sin(rotDog * 0.05f); // Mueve las patas delanteras
-	//	RLegs = 15.0f * sin(rotDog * 0.05f);  // Mueve las patas traseras
-	//	// Mantener circularAngle en el rango [0, 2π]
-	//	if (angle > 2 * 3.15) {
-	//		angle -= 2 * 3.15;
-	//	}
-	//}
-
-	//if (keys[GLFW_KEY_2]) rotDogX += 0.1f;
-	//if (keys[GLFW_KEY_3]) rotDogX -= 0.1f;
-
-	//if (keys[GLFW_KEY_4]) head += 0.1f;
-	//if (keys[GLFW_KEY_5]) head -= 0.1f;
-
-	//if (keys[GLFW_KEY_6]) tail += 0.1f;
-	//if (keys[GLFW_KEY_7]) tail -= 0.1f;
-
-	//if (keys[GLFW_KEY_8]) RLegs += 0.1f;
-	//if (keys[GLFW_KEY_9]) RLegs -= 0.1f;
-
-	//if (keys[GLFW_KEY_Z]) FLegsL += 0.1f;
-	//if (keys[GLFW_KEY_X]) FLegsL -= 0.1f;
-
-	//if (keys[GLFW_KEY_M]) FLegsR += 0.1f;
-	//if (keys[GLFW_KEY_N]) FLegsR -= 0.1f;
-
-	//if (keys[GLFW_KEY_H]) dogPosZ += 0.001;
-	//if (keys[GLFW_KEY_Y]) dogPosZ -= 0.001;
-
-	//if (keys[GLFW_KEY_G]) dogPosX -= 0.001;
-	//if (keys[GLFW_KEY_J]) dogPosX += 0.001;
-
-	//if (keys[GLFW_KEY_C]) dogPosY -= 0.001;
-	//if (keys[GLFW_KEY_V]) dogPosY += 0.001;
-
-	// ===== Controles PERSONA =====
-	if (keys[GLFW_KEY_1]) { // caminar simple con balanceo
-		perRotY += 0.05f;
-		float osc = 15.0f * sin(perRotY * 0.05f);
-		perArmL = osc;
-		perArmR = -osc;
-		perLegL = -osc;
-		perLegR = osc;
+	//Dog Controls
+	if (keys[GLFW_KEY_1])
+	{
+		angle += speed;  // Incrementa el ángulo para el movimiento circular
+		//dogPosX = radio * cos(angle); // Posición en X
+		//dogPosZ = radio * sin(angle); // Posición en Z
+		rotDog += 0.05f;
+		FLegs = 15.0f * sin(rotDog * 0.05f); // Mueve las patas delanteras
+		RLegs = 15.0f * sin(rotDog * 0.05f);  // Mueve las patas traseras
+		// Mantener circularAngle en el rango [0, 2π]
+		if (angle > 2 * 3.15) {
+			angle -= 2 * 3.15;
+		}
 	}
 
-	if (keys[GLFW_KEY_2]) perRotX += 0.1f;
-	if (keys[GLFW_KEY_3]) perRotX -= 0.1f;
+	/*if (keys[GLFW_KEY_2]) rotDogX += 0.1f;
+	if (keys[GLFW_KEY_3]) rotDogX -= 0.1f;
 
-	if (keys[GLFW_KEY_4]) perHead += 0.1f;
-	if (keys[GLFW_KEY_5]) perHead -= 0.1f;
+	if (keys[GLFW_KEY_4]) head += 0.1f;
+	if (keys[GLFW_KEY_5]) head -= 0.1f;
 
-	if (keys[GLFW_KEY_Z]) perArmL += 0.1f;
-	if (keys[GLFW_KEY_X]) perArmL -= 0.1f;
+	if (keys[GLFW_KEY_6]) tail += 0.1f;
+	if (keys[GLFW_KEY_7]) tail -= 0.1f;
 
-	if (keys[GLFW_KEY_M]) perArmR += 0.1f;
-	if (keys[GLFW_KEY_N]) perArmR -= 0.1f;
+	if (keys[GLFW_KEY_8]) RLegs += 0.1f;
+	if (keys[GLFW_KEY_9]) RLegs -= 0.1f;
 
-	// piernas (ajústales teclas si quieres independientes)
-	if (keys[GLFW_KEY_8]) perLegL += 0.1f;
-	if (keys[GLFW_KEY_9]) perLegL -= 0.1f;
+	if (keys[GLFW_KEY_Z]) FLegsL += 0.1f;
+	if (keys[GLFW_KEY_X]) FLegsL -= 0.1f;
 
-	if (keys[GLFW_KEY_H]) perPosZ += 0.001f;
-	if (keys[GLFW_KEY_Y]) perPosZ -= 0.001f;
-	if (keys[GLFW_KEY_G]) perPosX -= 0.001f;
-	if (keys[GLFW_KEY_J]) perPosX += 0.001f;
-	if (keys[GLFW_KEY_C]) perPosY -= 0.001f;
-	if (keys[GLFW_KEY_V]) perPosY += 0.001f;
+	if (keys[GLFW_KEY_M]) FLegsR += 0.1f;
+	if (keys[GLFW_KEY_N]) FLegsR -= 0.1f;
+
+	if (keys[GLFW_KEY_H]) dogPosZ += 0.001;
+	if (keys[GLFW_KEY_Y]) dogPosZ -= 0.001;
+
+	if (keys[GLFW_KEY_G]) dogPosX -= 0.001;
+	if (keys[GLFW_KEY_J]) dogPosX += 0.001;
+
+	if (keys[GLFW_KEY_C]) dogPosY -= 0.001;
+	if (keys[GLFW_KEY_V]) dogPosY += 0.001;*/
+
+	//// ===== Controles PERSONA =====
+	//if (keys[GLFW_KEY_1]) { // caminar simple con balanceo
+	//	perRotY += 0.05f;
+	//	float osc = 15.0f * sin(perRotY * 0.05f);
+	//	perArmL = osc;
+	//	perArmR = -osc;
+	//	perLegL = -osc;
+	//	perLegR = osc;
+	//}
+
+	//if (keys[GLFW_KEY_2]) perRotX += 0.1f;
+	//if (keys[GLFW_KEY_3]) perRotX -= 0.1f;
+
+	//if (keys[GLFW_KEY_4]) perHead += 0.1f;
+	//if (keys[GLFW_KEY_5]) perHead -= 0.1f;
+
+	//if (keys[GLFW_KEY_Z]) perArmL += 0.1f;
+	//if (keys[GLFW_KEY_X]) perArmL -= 0.1f;
+
+	//if (keys[GLFW_KEY_M]) perArmR += 0.1f;
+	//if (keys[GLFW_KEY_N]) perArmR -= 0.1f;
+
+	//// piernas (ajústales teclas si quieres independientes)
+	//if (keys[GLFW_KEY_8]) perLegL += 0.1f;
+	//if (keys[GLFW_KEY_9]) perLegL -= 0.1f;
+
+	//if (keys[GLFW_KEY_H]) perPosZ += 0.001f;
+	//if (keys[GLFW_KEY_Y]) perPosZ -= 0.001f;
+	//if (keys[GLFW_KEY_G]) perPosX -= 0.001f;
+	//if (keys[GLFW_KEY_J]) perPosX += 0.001f;
+	//if (keys[GLFW_KEY_C]) perPosY -= 0.001f;
+	//if (keys[GLFW_KEY_V]) perPosY += 0.001f;
 
 
 	// Camera controls
