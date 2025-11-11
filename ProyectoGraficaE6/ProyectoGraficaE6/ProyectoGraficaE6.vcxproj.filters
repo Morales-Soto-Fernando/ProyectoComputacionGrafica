@@ -16,6 +16,9 @@
     <Filter Include="Archivos de origen\Shader">
       <UniqueIdentifier>{e6422c57-36a7-4317-ac19-5684c69d8ffc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de origen\Audio">
+      <UniqueIdentifier>{fa33cdee-18ed-4aa1-aa9f-150849d2312c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -31,6 +34,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="miniaudio.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
@@ -65,6 +71,11 @@
     <None Include="Shader\SkyBox.vs">
       <Filter>Archivos de origen\Shader</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Audio\Fondo.ogg">
+      <Filter>Archivos de origen\Audio</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="KeyFrames.cpp">
