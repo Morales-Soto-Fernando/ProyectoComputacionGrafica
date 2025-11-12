@@ -1659,28 +1659,28 @@ int main()
 		// ###########################################################
 		// ### DIBUJADO DE LA LÁMPARA (LAMP SHADER) ###
 		// ###########################################################
-		lampShader.Use();
-		// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
-		modelLoc = glGetUniformLocation(lampShader.Program, "model");
-		viewLoc = glGetUniformLocation(lampShader.Program, "view");
-		projLoc = glGetUniformLocation(lampShader.Program, "projection");
+		//lampShader.Use();
+		//// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
+		//modelLoc = glGetUniformLocation(lampShader.Program, "model");
+		//viewLoc = glGetUniformLocation(lampShader.Program, "view");
+		//projLoc = glGetUniformLocation(lampShader.Program, "projection");
 
-		// Set matrices
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-		model = glm::mat4(1);
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		//// Set matrices
+		//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		//glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		//model = glm::mat4(1);
+		//model = glm::translate(model, lightPos);
+		//model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-		model = glm::mat4(1);
-		model = glm::translate(model, pointLightPositions[0]);
-		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//model = glm::mat4(1);
+		//model = glm::translate(model, pointLightPositions[0]);
+		//model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		//glBindVertexArray(VAO);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		glBindVertexArray(0);
+		//glBindVertexArray(0);
 
 		// ###########################################################
 		// ### DIBUJADO DEL SKYBOX (SKYBOX SHADER) ###
