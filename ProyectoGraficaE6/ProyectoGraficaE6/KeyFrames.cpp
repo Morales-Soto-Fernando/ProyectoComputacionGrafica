@@ -213,7 +213,7 @@ float skelLegL = 0.0f, skelLegR = 0.0f;
 float dogPosX, dogPosY, dogPosZ;
 
 #define MAX_FRAMES 60
-int i_max_steps = 500;
+int i_max_steps = 100;
 int i_curr_steps = 0; //En qué punto de la línea de tiempo nos encontramos
 typedef struct _frame {
 
@@ -1158,6 +1158,7 @@ int main()
 		Lampara.Draw(lightingShader);
 
 		// --- DIBUJADO DEL PERRO ANIMADO ---
+		GLint modelLocDog = glGetUniformLocation(shader.Program, "model");
 		glm::mat4 modelDog = glm::mat4(1.0f);
 		// 1. Transformaciones Base del Perro (afectan a todo el cuerpo)
 		modelDog = glm::translate(modelDog, glm::vec3(dogPosX, dogPosY, dogPosZ));
@@ -1173,7 +1174,7 @@ int main()
 		glm::mat4 modelCabeza = modelDog;
 		modelCabeza = glm::rotate(modelCabeza, glm::radians(head), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelCabeza));
-		PerroCab.Draw(lightingShader);
+		PerroCab.Draw(shader);
 
 		// 4. Dibujar COLA
 		glm::mat4 modelCola = modelDog;
