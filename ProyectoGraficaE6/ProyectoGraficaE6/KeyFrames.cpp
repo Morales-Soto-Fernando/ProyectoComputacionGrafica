@@ -45,6 +45,7 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 void Animation();
 void AnimatePerson();
+void AnimateSkeleton();
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
@@ -194,7 +195,19 @@ float personTargetX_2;   // -20 -> 20
 float personTargetRot_3; // 90 -> 0 
 float personTargetZ_2;   // 20 -> 60
 float personTargetRot_4; // 0 -> 180
-
+// ===============================================
+// ===== VARIABLES DEL ESQUELETO (BAILE) =====
+// ===============================================
+// --- Posición base (tomada de tu código estático)
+float skelPosX = 12.0f;
+float skelPosY = 0.5f;
+float skelPosZ = 45.0f;
+float skelBaseRotY = 45.0f; // Rotación estática
+// --- Variables de animación
+float danceAngle = 0.0f;    // El "reloj" para el baile
+float danceRotY = 0.0f;     // Giro del cuerpo
+float skelArmL = 0.0f, skelArmR = 0.0f;
+float skelLegL = 0.0f, skelLegR = 0.0f;
 //KeyFrames
 float dogPosX, dogPosY, dogPosZ;
 
@@ -929,7 +942,7 @@ int main()
 		DoMovement();
 		Animation();
 		AnimatePerson();
-
+		AnimateSkeleton();
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1530,57 +1543,69 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		Viepieder.Draw(shader);
 
-		// Esqueleto cabeza
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Ecabeza.Draw(shader);
+		// ===============================================
+		// ===== ESQUELETO (BAILE) =====
+		// ===============================================
+		// 1. Matriz Base (Torso) - SIN ESCALA
+		glm::mat4 esqueletoBase = glm::mat4(1.0f);
+		esqueletoBase = glm::translate(esqueletoBase, glm::vec3(skelPosX, skelPosY, skelPosZ));
+		esqueletoBase = glm::rotate(esqueletoBase, glm::radians(skelBaseRotY), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación estática
+		esqueletoBase = glm::rotate(esqueletoBase, glm::radians(danceRotY), glm::vec3(0.0f, 1.0f, 0.0f));  // Rotación de baile
 
-		// Esqueleto torso
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 2. Torso (se dibuja con la base)
+		glm::mat4 modelEtorso = esqueletoBase;
+		modelEtorso = glm::scale(modelEtorso, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEtorso));
 		Etorso.Draw(shader);
 
-		// Esqueleto brazo derecho
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 3. Cabeza (hija de la base)
+		glm::mat4 modelEcabeza = esqueletoBase;
+		// (Asumimos que el pivote está en 0,0,0 relativo al torso)
+		modelEcabeza = glm::scale(modelEcabeza, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEcabeza));
+		Ecabeza.Draw(shader);
+
+		// 4. Brazo Derecho (hijo de la base)
+		glm::mat4 modelEbraR = esqueletoBase;
+		modelEbraR = glm::rotate(modelEbraR, glm::radians(skelArmR), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación de baile
+		modelEbraR = glm::scale(modelEbraR, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEbraR));
 		Ebrader.Draw(shader);
 
-		// Esqueleto brazo izquierdo
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 5. Brazo Izquierdo (hijo de la base)
+		glm::mat4 modelEbraL = esqueletoBase;
+		modelEbraL = glm::rotate(modelEbraL, glm::radians(skelArmL), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación de baile
+		modelEbraL = glm::scale(modelEbraL, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEbraL));
 		Ebraizq.Draw(shader);
 
-		// Esqueleto pelvis
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 6. Pelvis (hija de la base y PADRE de las piernas)
+		glm::mat4 modelEpelvis_sinEscala = esqueletoBase;
+		// (Asumimos pivote 0,0,0)
+
+		// 6b. Dibujar Pelvis
+		glm::mat4 modelEpelvis_conEscala = modelEpelvis_sinEscala;
+		modelEpelvis_conEscala = glm::scale(modelEpelvis_conEscala, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEpelvis_conEscala));
 		Epelvis.Draw(shader);
 
-		// Esqueleto pierna derecha
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 7. Pierna Derecha (hija de Pelvis)
+		glm::mat4 modelEpieR = modelEpelvis_sinEscala; // <-- Inicia desde la pelvis
+		modelEpieR = glm::rotate(modelEpieR, glm::radians(skelLegR), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación de baile
+		modelEpieR = glm::scale(modelEpieR, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEpieR));
 		Epieder.Draw(shader);
 
-		// Esqueleto pierna izquierda
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, 0.5f, 45.0f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 8. Pierna Izquierda (hija de Pelvis)
+		glm::mat4 modelEpieL = modelEpelvis_sinEscala; // <-- Inicia desde la pelvis
+		modelEpieL = glm::rotate(modelEpieL, glm::radians(skelLegL), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación de baile
+		modelEpieL = glm::scale(modelEpieL, glm::vec3(0.5f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEpieL));
 		Epieizq.Draw(shader);
 
-
-
+		// ===============================================
+		// ===== FIN DE ESQUELETO =====
+		// ===============================================
 
 
 		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
@@ -2122,4 +2147,25 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 	lastY = yPos;
 
 	camera.ProcessMouseMovement(xOffset, yOffset);
+}
+// ==========================================================
+// --- MÁQUINA DE ESTADOS DEL ESQUELETO (BAILE) ---
+// ==========================================================
+void AnimateSkeleton()
+{
+	// 1. Aumentar el "reloj" del baile y el giro
+	// (0.8f es la velocidad del baile, 30.0f es la velocidad de giro)
+	danceAngle += glm::two_pi<float>() * 0.8f * deltaTime;
+	danceRotY += 30.0f * deltaTime; // Giro lento y constante
+
+	// 2. Calcular oscilaciones simples (un baile "sencillo")
+	float armSwing = 5.0f * sinf(danceAngle); // Los brazos se mueven 50°
+	float legSwing = 5.0f * cosf(danceAngle); // Las piernas 35°, fuera de fase
+
+	// 3. Aplicar a las articulaciones
+	skelArmL = armSwing;
+	skelArmR = -armSwing; // Opuesto
+
+	skelLegL = legSwing;
+	skelLegR = -legSwing; // Opuesto
 }
