@@ -5,6 +5,7 @@ Fecha de entrega 12 de Noviembre del 2025
 318063188
 319279207
  */
+
 #include <iostream>
 #include <cmath>
 #include <fstream>
@@ -615,6 +616,38 @@ void setupDogAnimation() {
 
 	printf("Animacion extendida cargada. Total de frames: %d\n", FrameIndex);
 }
+#include "stb_image.h"
+
+static GLuint LoadCubemapSTB(const std::vector<const char*>& faces) {
+	GLuint texID;
+	glGenTextures(1, &texID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texID);
+
+	int w, h, comp;
+	stbi_set_flip_vertically_on_load(false);  // ¡no voltear cubemaps!
+
+	for (GLuint i = 0; i < faces.size(); i++) {
+		unsigned char* data = stbi_load(faces[i], &w, &h, &comp, 0);
+		if (!data) {
+			std::cerr << "CUBEMAP: fallo al cargar cara: " << faces[i] << std::endl;
+			glDeleteTextures(1, &texID);
+			return 0;
+		}
+		GLenum fmt = (comp == 4) ? GL_RGBA : GL_RGB;
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, fmt, w, h, 0, fmt, GL_UNSIGNED_BYTE, data);
+		stbi_image_free(data);
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	return texID;
+}
+
 int main()
 {
 	// Init GLFW
@@ -835,7 +868,7 @@ int main()
 	/////////////////////////////////////////////////
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
 	///////////////////PIPELINE RENDERIZADO SKYBOX//////////////////
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -851,7 +884,7 @@ int main()
 
 	// Set texture units
 	lightingShader.Use();
-	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 1);
+	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.specular"), 1);
 
 	///////////////////////////SKYBOX/////////////////////////
@@ -860,20 +893,31 @@ int main()
 	glGenBuffers(1, &skyBoxVBO);
 	glBindVertexArray(skyBoxVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, skyBoxVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
 	//Load textures
+	// CÓDIGO CORREGIDO (Orden Correcto)
 	vector < const GLchar*> faces;
-	faces.push_back("SkyBox/pz.jpg");
-	faces.push_back("SkyBox/nz.jpg");
-	faces.push_back("SkyBox/py.jpg");
-	faces.push_back("SkyBox/ny.jpg");
-	faces.push_back("SkyBox/nx.jpg");
-	faces.push_back("SkyBox/px.jpg");
+	faces.push_back("SkyBox/px.jpg"); // Right (+X)
+	faces.push_back("SkyBox/nx.jpg"); // Left (-X)
+	faces.push_back("SkyBox/py.jpg"); // Top (+Y)
+	faces.push_back("SkyBox/ny.jpg"); // Bottom (-Y)
+	faces.push_back("SkyBox/pz.jpg"); // Front (+Z)
+	faces.push_back("SkyBox/nz.jpg"); // Back (-Z)
 
-	GLuint cubemapTexture = TextureLoading::LoadCubemap(faces);
+	GLuint cubemapTexture = LoadCubemapSTB(faces);
+	if (cubemapTexture == 0) {
+		std::cerr << "ERROR: el cubemap no se cargo (id=0). Revisa rutas/nombres.\n";
+	}
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	/////////////////////////////////////////////////////////
 	ma_result result = ma_sound_init_from_file(&audio_engine, "Audio/Fondo.mp3", 0, NULL, NULL, &bgm_sound);
 	if (result == MA_SUCCESS) {
@@ -955,7 +999,10 @@ int main()
 
 
 
-		// Use cooresponding shader when setting uniforms/drawing objects
+		// ###########################################################
+		// ### INICIO DE TODO EL DIBUJADO ###
+		// Se activa UN SOLO SHADER para TODOS los modelos
+		// ###########################################################
 		lightingShader.Use();
 
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "diffuse"), 0);
@@ -965,12 +1012,11 @@ int main()
 		glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 
 
-		// Directional light
+		// Directional light (OSCURA)
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.6f, 0.6f, 0.6f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.15f, 0.15f, 0.15f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.3f, 0.3f, 0.3f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.3f, 0.3f, 0.3f);
-
 
 		// Point light 1
 		glm::vec3 lightColor;
@@ -988,17 +1034,17 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);
 
 
-		// SpotLight
+		// SpotLight (LINTERNA INTENSA)
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.position"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.direction"), camera.GetFront().x, camera.GetFront().y, camera.GetFront().z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.ambient"), 0.2f, 0.2f, 0.8f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.diffuse"), 0.2f, 0.2f, 0.8f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.specular"), 0.0f, 0.0f, 0.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.ambient"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.diffuse"), 2.50f, 2.50f, 2.50f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.specular"), 2.50f, 2.50f, 2.50f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.linear"), 0.3f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.quadratic"), 0.7f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.cutOff"), glm::cos(glm::radians(12.0f)));
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.outerCutOff"), glm::cos(glm::radians(18.0f)));
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.linear"), 0.9f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.quadratic"), 0.032f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.cutOff"), glm::cos(glm::radians(10.0f)));
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.outerCutOff"), glm::cos(glm::radians(14.0f)));
 
 
 		// Set material properties
@@ -1008,7 +1054,7 @@ int main()
 		glm::mat4 view;
 		view = camera.GetViewMatrix();
 
-		// Get the uniform locations
+		// Get the uniform locations (SOLO UNA VEZ)
 		GLint modelLoc = glGetUniformLocation(lightingShader.Program, "model");
 		GLint viewLoc = glGetUniformLocation(lightingShader.Program, "view");
 		GLint projLoc = glGetUniformLocation(lightingShader.Program, "projection");
@@ -1081,33 +1127,35 @@ int main()
 		// Galeria
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// --- LUZ ESPECIAL PARA GALERIA ---
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.4f, 0.4f, 0.4f);
 		Galeria.Draw(lightingShader);
+		// --- LUZ OSCURA PARA TODO LO DEMÁS ---
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.15f, 0.15f, 0.15f);
+
 		// Piso
 		model = modelTemp;
 		model = glm::translate(model, glm::vec3(0.0f, 0.093f, 0.208f));
-		// model = glm::rotate(model, glm::radians(head), glm::vec3(1.0f, 0.0f, 0.0f)); // <-- Línea eliminada/comentada
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso.Draw(lightingShader);
-		
-		// --- ACTIVAR 'shader' (modelLoading) Y CARGAR MATRICES ---
-		shader.Use();
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+		// ###########################################################
+		// ### YA NO SE CAMBIA DE SHADER AQUÍ ###
+		// ###########################################################
 
 		//Lámpara 1
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(35.0f, -1.0f, 10.0f));
 		model = glm::rotate(model, glm::radians(240.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(2.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Lampara.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Lampara.Draw(lightingShader);
 
 		//Lámpara 2
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(-40.0f, -1.0f, -10.0f));
 		model = glm::rotate(model, glm::radians(240.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(2.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Lampara.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Lampara.Draw(lightingShader);
 
 		// --- DIBUJADO DEL PERRO ANIMADO ---
 		glm::mat4 modelDog = glm::mat4(1.0f);
@@ -1119,66 +1167,59 @@ int main()
 
 		// 2. Dibujar TORSO (es la base)
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelDog));
-		PerroTor.Draw(shader);
+		PerroTor.Draw(lightingShader);
 
 		// 3. Dibujar CABEZA (hijo del torso)
-		// Creamos una matriz nueva para la cabeza, basada en el torso
 		glm::mat4 modelCabeza = modelDog;
-		// Aplicamos la rotación local de la cabeza (eje Y)
 		modelCabeza = glm::rotate(modelCabeza, glm::radians(head), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelCabeza));
-		PerroCab.Draw(shader);
+		PerroCab.Draw(lightingShader);
 
 		// 4. Dibujar COLA
-		// Creamos una matriz nueva para la cola, basada en el torso
 		glm::mat4 modelCola = modelDog;
-		// Aplicamos la rotación local de la cola (eje Y)
 		modelCola = glm::rotate(modelCola, glm::radians(tail), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelCola));
-		PerroCol.Draw(shader);
+		PerroCol.Draw(lightingShader);
 
 		// --- CORRECCIÓN DE PIVOTE PARA PATAS ---
-		// Tienes que encontrar estos valores a prueba y error.
-		// Son la posición (X, Y, Z) de la articulación relativa al centro del torso.
-		glm::vec3 hombroIzquierdo = glm::vec3(0.0f, 0.0f, 0.0f); // (Adelante/Atrás, Arriba/Abajo, Izquierda/Derecha)
+		glm::vec3 hombroIzquierdo = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3 hombroDerecho = glm::vec3(-0.0f, 0.0f, 0.0f);
 		glm::vec3 caderaIzquierda = glm::vec3(0.0f, 0.0f, -0.0f);
 		glm::vec3 caderaDerecha = glm::vec3(-0.0f, 0.0f, -0.0f);
 
 
 		// 5. PATA DELANTERA IZQUIERDA (FI)
-		glm::mat4 modelPataFI = modelDog; // 1. Empezar desde el torso
-		modelPataFI = glm::translate(modelPataFI, hombroIzquierdo); // 2. Mover al hombro
-		modelPataFI = glm::rotate(modelPataFI, glm::radians(FLegsL), glm::vec3(1.0f, 0.0f, 0.0f)); // 3. Rotar
+		glm::mat4 modelPataFI = modelDog;
+		modelPataFI = glm::translate(modelPataFI, hombroIzquierdo);
+		modelPataFI = glm::rotate(modelPataFI, glm::radians(FLegsL), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelPataFI));
-		PerroPatFI.Draw(shader); // 4. Dibujar la pata (su .obj debe estar centrado en 0,0,0)
+		PerroPatFI.Draw(lightingShader);
 
 		// 6. PATA DELANTERA DERECHA (FD)
 		glm::mat4 modelPataFD = modelDog;
 		modelPataFD = glm::translate(modelPataFD, hombroDerecho);
 		modelPataFD = glm::rotate(modelPataFD, glm::radians(FLegsR), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelPataFD));
-		PerroPatFD.Draw(shader);
+		PerroPatFD.Draw(lightingShader);
 
 		// 7. PATA TRASERA IZQUIERDA (TI)
 		glm::mat4 modelPataTI = modelDog;
 		modelPataTI = glm::translate(modelPataTI, caderaIzquierda);
 		modelPataTI = glm::rotate(modelPataTI, glm::radians(RLegs), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelPataTI));
-		PerroPatTI.Draw(shader);
+		PerroPatTI.Draw(lightingShader);
 
 		// 8. PATA TRASERA DERECHA (TD)
 		glm::mat4 modelPataTD = modelDog;
 		modelPataTD = glm::translate(modelPataTD, caderaDerecha);
-		// Decidimos qué variable usar para la pata opuesta
-		if (rotDogX < -10.0f) { // Si está sentado
+		if (rotDogX < -10.0f) {
 			modelPataTD = glm::rotate(modelPataTD, glm::radians(RLegs), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
-		else { // Si está caminando
-			modelPataTD = glm::rotate(modelPataTD, glm::radians(FLegsL), glm::vec3(1.0f, 0.0f, 0.0f)); // Movimiento cruzado
+		else {
+			modelPataTD = glm::rotate(modelPataTD, glm::radians(FLegsL), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelPataTD));
-		PerroPatTD.Draw(shader);
+		PerroPatTD.Draw(lightingShader);
 
 
 		//Arbol 1
@@ -1187,8 +1228,8 @@ int main()
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.05f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Arbol.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Arbol.Draw(lightingShader);
 
 		//Arbol 2
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(50.0f, 0.5f, 30.0f));
@@ -1196,33 +1237,35 @@ int main()
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.05f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Arbol.Draw(shader);
-		
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Arbol.Draw(lightingShader);
+
 		//Arbol 3
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 0.5f, -50.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.05f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Arbol.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Arbol.Draw(lightingShader);
+
 		//Manos
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 8.7f, 25.5f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(2.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Hands.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Hands.Draw(lightingShader);
+
 		//Demon
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 8.40f, -6.8f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(25.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(1.30f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Demon.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Demon.Draw(lightingShader);
 
 		//Witcher
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(-25.0f, 0.30f, -15.0f));
@@ -1230,24 +1273,26 @@ int main()
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(3.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Witch.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Witch.Draw(lightingShader);
+
 		//Ritual
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(23.8f, 0.7f, -14.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(3.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Ritual.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Ritual.Draw(lightingShader);
+
 		//cadaver
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(23.9f, 2.30f, -15.5f));
 		model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.30f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Corpse.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Corpse.Draw(lightingShader);
 
 		// --- MATRIZ BASE DEL PRIMER MURCIELAGO ---
 		model = glm::mat4(1.0f);
@@ -1256,33 +1301,29 @@ int main()
 		model = glm::scale(model, glm::vec3(0.5f));
 
 		// --- TORSO ---
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		BatCuerpo.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		BatCuerpo.Draw(lightingShader);
 
 		// --- COLA ---
 		glm::mat4 tail = model;
-		tail = glm::translate(tail, glm::vec3(0.0f, -0.05f, -0.20f)); // más unida al cuerpo
-		tail = glm::rotate(tail, glm::radians(tailSwing), glm::vec3(0.0f, 1.0f, 0.0f)); // leve balanceo lateral
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(tail));
-		BatAguja.Draw(shader);
+		tail = glm::translate(tail, glm::vec3(0.0f, -0.05f, -0.20f));
+		tail = glm::rotate(tail, glm::radians(tailSwing), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tail)); // <-- CORREGIDO
+		BatAguja.Draw(lightingShader);
 
 		// --- Ala derecha ---
 		glm::mat4 rightWing = glm::translate(model, glm::vec3(0.35f, 0.05f, 0.0f));
-		// primero abre/cierra
 		rightWing = glm::rotate(rightWing, glm::radians(-wingAngle * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		// luego sube/baja un poco
 		rightWing = glm::rotate(rightWing, glm::radians(-wingAngle * 0.5f), glm::vec3(0.0f, 0.0f, 1.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(rightWing));
-		BatAlader.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(rightWing)); // <-- CORREGIDO
+		BatAlader.Draw(lightingShader);
 
 		// --- Ala izquierda ---
 		glm::mat4 leftWing = glm::translate(model, glm::vec3(-0.35f, 0.05f, 0.0f));
-		// abre/cierra
 		leftWing = glm::rotate(leftWing, glm::radians(wingAngle * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		// sube/baja
 		leftWing = glm::rotate(leftWing, glm::radians(wingAngle * 0.4f), glm::vec3(0.0f, 0.0f, 1.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(leftWing));
-		BatAlaizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(leftWing)); // <-- CORREGIDO
+		BatAlaizq.Draw(lightingShader);
 
 		// --- MATRIZ BASE DEL SEGUNDO MURCIELAGO ---
 		model = glm::mat4(1.0f);
@@ -1291,33 +1332,29 @@ int main()
 		model = glm::scale(model, glm::vec3(0.2f));
 
 		// --- TORSO ---
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		BatCuerpo.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		BatCuerpo.Draw(lightingShader);
 
 		// --- COLA ---
 		glm::mat4 tail2 = model;
-		tail2 = glm::translate(tail2, glm::vec3(0.0f, -0.05f, -0.20f)); // más unida al cuerpo
-		tail2 = glm::rotate(tail2, glm::radians(tailSwing), glm::vec3(0.0f, 1.0f, 0.0f)); // leve balanceo lateral
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(tail2));
-		BatAguja.Draw(shader);
+		tail2 = glm::translate(tail2, glm::vec3(0.0f, -0.05f, -0.20f));
+		tail2 = glm::rotate(tail2, glm::radians(tailSwing), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tail2)); // <-- CORREGIDO
+		BatAguja.Draw(lightingShader);
 
 		// --- Ala derecha ---
 		glm::mat4 rightWing2 = glm::translate(model, glm::vec3(0.35f, 0.05f, 0.0f));
-		// primero abre/cierra
 		rightWing2 = glm::rotate(rightWing2, glm::radians(-wingAngle * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		// luego sube/baja un poco
 		rightWing2 = glm::rotate(rightWing2, glm::radians(-wingAngle * 0.5f), glm::vec3(0.0f, 0.0f, 1.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(rightWing2));
-		BatAlader.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(rightWing2)); // <-- CORREGIDO
+		BatAlader.Draw(lightingShader);
 
 		// --- Ala izquierda ---
 		glm::mat4 leftWing2 = glm::translate(model, glm::vec3(-0.35f, 0.05f, 0.0f));
-		// abre/cierra
 		leftWing2 = glm::rotate(leftWing2, glm::radians(wingAngle * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		// sube/baja
 		leftWing2 = glm::rotate(leftWing2, glm::radians(wingAngle * 0.4f), glm::vec3(0.0f, 0.0f, 1.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(leftWing2));
-		BatAlaizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(leftWing2)); // <-- CORREGIDO
+		BatAlaizq.Draw(lightingShader);
 
 
 
@@ -1325,97 +1362,94 @@ int main()
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(15.0f, 0.5f, 52.5f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Sofa.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Sofa.Draw(lightingShader);
 
 
 		// Sofa 2
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 45.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Sofa.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Sofa.Draw(lightingShader);
 
 		// Sofa 3
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 40.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Sofa.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Sofa.Draw(lightingShader);
 
 		// Sofa 4
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.5f, 35.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Sofa.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Sofa.Draw(lightingShader);
 
 		// Recepcion
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(7.0f, 0.5f, 51.5f));
 		model = glm::rotate(model, glm::radians(350.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.08f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Recepcion.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Recepcion.Draw(lightingShader);
 
 		// Mesa Picnic
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(45.0f, 0.5f, 45.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.05f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Mesa.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // <-- CORREGIDO
+		Mesa.Draw(lightingShader);
 
 
-		// --- VOLVER A 'lightingShader' Y CARGAR MATRICES ---
-		lightingShader.Use();
-		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		// ###########################################################
+		// ### YA NO SE CAMBIA DE SHADER AQUÍ ###
+		// ###########################################################
 
 
 		// ===============================================
 		// ===== PERSONA (CORRECCIÓN DE ORDEN DE ESCALA) =====
 		// ===============================================
-		shader.Use(); // Asegurarnos de que el shader correcto esté activo
 
 		// 1. Matriz Base (Torso) - SIN ESCALA
 		glm::mat4 personaBase = glm::mat4(1.0f);
 		personaBase = glm::translate(personaBase, glm::vec3(perPosX, perPosY, perPosZ));
 		personaBase = glm::rotate(personaBase, glm::radians(perRotY), glm::vec3(0.0f, 1.0f, 0.0f));
 		personaBase = glm::rotate(personaBase, glm::radians(perRotX), glm::vec3(1.0f, 0.0f, 0.0f));
-		// *** ¡LA ESCALA SE QUITÓ DE AQUÍ! ***
 
 		// 1.b. Dibujar Torso (con su propia escala)
-		glm::mat4 modelTorso = personaBase; // Copia la base
-		modelTorso = glm::scale(modelTorso, glm::vec3(0.4f)); // Aplica escala SÓLO al torso
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelTorso));
-		Ptorso.Draw(shader);
+		glm::mat4 modelTorso = personaBase;
+		modelTorso = glm::scale(modelTorso, glm::vec3(0.4f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelTorso));
+		Ptorso.Draw(lightingShader);
 
 		// 2. Cabeza (hija de personaBase)
-		glm::mat4 modelCabezaP = personaBase; // <-- Empieza desde la base SIN ESCALA
-		modelCabezaP = glm::translate(modelCabezaP, glm::vec3(0.0f, 0.0f, 0.0f)); // Pivote (ahora en espacio normal)
+		glm::mat4 modelCabezaP = personaBase;
+		modelCabezaP = glm::translate(modelCabezaP, glm::vec3(0.0f, 0.0f, 0.0f));
 		modelCabezaP = glm::rotate(modelCabezaP, glm::radians(perHead), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelCabezaP = glm::scale(modelCabezaP, glm::vec3(0.4f)); // Aplicar escala AL FINAL
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelCabezaP));
-		Pcabeza.Draw(shader);
+		modelCabezaP = glm::scale(modelCabezaP, glm::vec3(0.4f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelCabezaP));
+		Pcabeza.Draw(lightingShader);
 
 		// --- JERARQUÍA DEL BRAZO IZQUIERDO ---
 		// 3. Hombro Izquierdo (Matriz padre para el codo)
-		glm::mat4 modelHomL_sinEscala = personaBase; // <-- Empieza desde la base SIN ESCALA
-		modelHomL_sinEscala = glm::translate(modelHomL_sinEscala, glm::vec3(0.0f, 0.0f, 0.0f)); // Pivote (espacio normal)
+		glm::mat4 modelHomL_sinEscala = personaBase;
+		modelHomL_sinEscala = glm::translate(modelHomL_sinEscala, glm::vec3(0.0f, 0.0f, 0.0f));
 		modelHomL_sinEscala = glm::rotate(modelHomL_sinEscala, glm::radians(perArmL), glm::vec3(1.0f, 0.0f, 0.0f));
 
 		// 7. Antebrazo Izquierdo (hijo de Hombro Izq)
-		glm::mat4 modelAntL = modelHomL_sinEscala; // <-- EMPIEZA DESDE EL HOMBRO (sin escala)
-		modelAntL = glm::translate(modelAntL, glm::vec3(-0.30f, 0.30f, -0.70f)); // Pivote (espacio normal)
+		glm::mat4 modelAntL = modelHomL_sinEscala;
+		modelAntL = glm::translate(modelAntL, glm::vec3(-0.30f, 0.30f, -0.70f));
 		modelAntL = glm::rotate(modelAntL, glm::radians(perElbowL), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelAntL = glm::scale(modelAntL, glm::vec3(0.4f)); // Escala AL FINAL
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelAntL));
-		Pantebrasizq.Draw(shader);
+		modelAntL = glm::scale(modelAntL, glm::vec3(0.4f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelAntL));
+		Pantebrasizq.Draw(lightingShader);
 
 		// 3.b. Dibujar Hombro Izquierdo (Ahora dibujamos el padre)
-		glm::mat4 modelHomL_conEscala = modelHomL_sinEscala; // Tomamos la matriz sin escala
-		modelHomL_conEscala = glm::scale(modelHomL_conEscala, glm::vec3(0.4f)); // Escala AL FINAL
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelHomL_conEscala));
-		Phombroizq.Draw(shader);
+		glm::mat4 modelHomL_conEscala = modelHomL_sinEscala;
+		modelHomL_conEscala = glm::scale(modelHomL_conEscala, glm::vec3(0.4f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHomL_conEscala));
+		Phombroizq.Draw(lightingShader);
 
 		// --- JERARQUÍA DEL BRAZO DERECHO ---
 		// 4. Hombro Derecho (Matriz padre para el codo)
@@ -1428,14 +1462,14 @@ int main()
 		modelAntR = glm::translate(modelAntR, glm::vec3(0.0f, -0.0f, -0.50f));
 		modelAntR = glm::rotate(modelAntR, glm::radians(perElbowR), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelAntR = glm::scale(modelAntR, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelAntR));
-		Pantebrasder.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelAntR));
+		Pantebrasder.Draw(lightingShader);
 
 		// 4.b. Dibujar Hombro Derecho (Padre)
 		glm::mat4 modelHomR_conEscala = modelHomR_sinEscala;
 		modelHomR_conEscala = glm::scale(modelHomR_conEscala, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelHomR_conEscala));
-		Phombroder.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHomR_conEscala));
+		Phombroder.Draw(lightingShader);
 
 		// --- JERARQUÍA DE LA PIERNA IZQUIERDA ---
 		// 5. Muslo Izquierdo (Matriz padre para la rodilla)
@@ -1448,14 +1482,14 @@ int main()
 		modelRodL = glm::translate(modelRodL, glm::vec3(0.0f, 0.350f, 0.0f));
 		modelRodL = glm::rotate(modelRodL, glm::radians(perKneeL), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelRodL = glm::scale(modelRodL, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelRodL));
-		Prodillaizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelRodL));
+		Prodillaizq.Draw(lightingShader);
 
 		// 5.b. Dibujar Muslo Izquierdo (Padre)
 		glm::mat4 modelMusL_conEscala = modelMusL_sinEscala;
 		modelMusL_conEscala = glm::scale(modelMusL_conEscala, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMusL_conEscala));
-		Pmusloizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMusL_conEscala));
+		Pmusloizq.Draw(lightingShader);
 
 		// --- JERARQUÍA DE LA PIERNA DERECHA ---
 		// 6. Muslo Derecho (Matriz padre para la rodilla)
@@ -1468,14 +1502,14 @@ int main()
 		modelRodR = glm::translate(modelRodR, glm::vec3(0.0f, 0.350f, 0.0f));
 		modelRodR = glm::rotate(modelRodR, glm::radians(perKneeR), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelRodR = glm::scale(modelRodR, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelRodR));
-		Prodillader.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelRodR));
+		Prodillader.Draw(lightingShader);
 
 		// 6.b. Dibujar Muslo Derecho (Padre)
 		glm::mat4 modelMusR_conEscala = modelMusR_sinEscala;
 		modelMusR_conEscala = glm::scale(modelMusR_conEscala, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMusR_conEscala));
-		Pmusloder.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMusR_conEscala));
+		Pmusloder.Draw(lightingShader);
 
 
 		// ===============================================
@@ -1483,65 +1517,65 @@ int main()
 		// ===============================================
 
 
-        // Escultura torso
+		// Escultura torso
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Vietor.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Vietor.Draw(lightingShader);
 
 		// Escultura cabeza
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Viecab.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Viecab.Draw(lightingShader);
 
 		// Escultura brazo izquierdo
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Viebraizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Viebraizq.Draw(lightingShader);
 
 		// Escultura brazo derecho
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Viebrader.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Viebrader.Draw(lightingShader);
 
 		// Escultura antebrazo izquierdo
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Vieanbizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Vieanbizq.Draw(lightingShader);
 
 		// Escultura antebrazo derecho
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Vieanbder.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Vieanbder.Draw(lightingShader);
 
 		// Escultura muslo izquierdo
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Viemusizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Viemusizq.Draw(lightingShader);
 
 		// Escultura muslo derecho
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Viemusder.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Viemusder.Draw(lightingShader);
 
 		// Escultura pierna izquierda
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Viepieizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Viepieizq.Draw(lightingShader);
 
 		// Escultura pierna derecha
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Viepieder.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Viepieder.Draw(lightingShader);
 
 		// ===============================================
 		// ===== ESQUELETO (BAILE) =====
@@ -1549,72 +1583,70 @@ int main()
 		// 1. Matriz Base (Torso) - SIN ESCALA
 		glm::mat4 esqueletoBase = glm::mat4(1.0f);
 		esqueletoBase = glm::translate(esqueletoBase, glm::vec3(skelPosX, skelPosY, skelPosZ));
-		esqueletoBase = glm::rotate(esqueletoBase, glm::radians(skelBaseRotY), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación estática
-		esqueletoBase = glm::rotate(esqueletoBase, glm::radians(danceRotY), glm::vec3(0.0f, 1.0f, 0.0f));  // Rotación de baile
+		esqueletoBase = glm::rotate(esqueletoBase, glm::radians(skelBaseRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+		esqueletoBase = glm::rotate(esqueletoBase, glm::radians(danceRotY), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// 2. Torso (se dibuja con la base)
 		glm::mat4 modelEtorso = esqueletoBase;
 		modelEtorso = glm::scale(modelEtorso, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEtorso));
-		Etorso.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelEtorso)); // <-- CORREGIDO
+		Etorso.Draw(lightingShader); // <-- CORREGIDO
 
 		// 3. Cabeza (hija de la base)
 		glm::mat4 modelEcabeza = esqueletoBase;
-		// (Asumimos que el pivote está en 0,0,0 relativo al torso)
 		modelEcabeza = glm::scale(modelEcabeza, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEcabeza));
-		Ecabeza.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelEcabeza)); // <-- CORREGIDO
+		Ecabeza.Draw(lightingShader); // <-- CORREGIDO
 
 		// 4. Brazo Derecho (hijo de la base)
 		glm::mat4 modelEbraR = esqueletoBase;
-		modelEbraR = glm::rotate(modelEbraR, glm::radians(skelArmR), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación de baile
+		modelEbraR = glm::rotate(modelEbraR, glm::radians(skelArmR), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelEbraR = glm::scale(modelEbraR, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEbraR));
-		Ebrader.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelEbraR)); // <-- CORREGIDO
+		Ebrader.Draw(lightingShader); // <-- CORREGIDO
 
 		// 5. Brazo Izquierdo (hijo de la base)
 		glm::mat4 modelEbraL = esqueletoBase;
-		modelEbraL = glm::rotate(modelEbraL, glm::radians(skelArmL), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación de baile
+		modelEbraL = glm::rotate(modelEbraL, glm::radians(skelArmL), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelEbraL = glm::scale(modelEbraL, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEbraL));
-		Ebraizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelEbraL)); // <-- CORREGIDO
+		Ebraizq.Draw(lightingShader); // <-- CORREGIDO
 
 		// 6. Pelvis (hija de la base y PADRE de las piernas)
 		glm::mat4 modelEpelvis_sinEscala = esqueletoBase;
-		// (Asumimos pivote 0,0,0)
 
 		// 6b. Dibujar Pelvis
 		glm::mat4 modelEpelvis_conEscala = modelEpelvis_sinEscala;
 		modelEpelvis_conEscala = glm::scale(modelEpelvis_conEscala, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEpelvis_conEscala));
-		Epelvis.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelEpelvis_conEscala)); // <-- CORREGIDO
+		Epelvis.Draw(lightingShader); // <-- CORREGIDO
 
 		// 7. Pierna Derecha (hija de Pelvis)
-		glm::mat4 modelEpieR = modelEpelvis_sinEscala; // <-- Inicia desde la pelvis
-		modelEpieR = glm::rotate(modelEpieR, glm::radians(skelLegR), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación de baile
+		glm::mat4 modelEpieR = modelEpelvis_sinEscala;
+		modelEpieR = glm::rotate(modelEpieR, glm::radians(skelLegR), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelEpieR = glm::scale(modelEpieR, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEpieR));
-		Epieder.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelEpieR)); // <-- CORREGIDO
+		Epieder.Draw(lightingShader); // <-- CORREGIDO
 
 		// 8. Pierna Izquierda (hija de Pelvis)
-		glm::mat4 modelEpieL = modelEpelvis_sinEscala; // <-- Inicia desde la pelvis
-		modelEpieL = glm::rotate(modelEpieL, glm::radians(skelLegL), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación de baile
+		glm::mat4 modelEpieL = modelEpelvis_sinEscala;
+		modelEpieL = glm::rotate(modelEpieL, glm::radians(skelLegL), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelEpieL = glm::scale(modelEpieL, glm::vec3(0.5f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelEpieL));
-		Epieizq.Draw(shader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelEpieL)); // <-- CORREGIDO
+		Epieizq.Draw(lightingShader); // <-- CORREGIDO
 
 		// ===============================================
 		// ===== FIN DE ESQUELETO =====
 		// ===============================================
 
 
-		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		model = glm::mat4(1);
 		model = glm::rotate(model, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0); //activa o desactiva la transparencia, si se desactiva el interior de la galeria se vera negro
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		//Ball.Draw(lightingShader);
 
 		// Restaura configuración normal
@@ -1623,7 +1655,9 @@ int main()
 		glBindVertexArray(0);
 
 
-		// Also draw the lamp object, again binding the appropriate shader
+		// ###########################################################
+		// ### DIBUJADO DE LA LÁMPARA (LAMP SHADER) ###
+		// ###########################################################
 		lampShader.Use();
 		// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
 		modelLoc = glGetUniformLocation(lampShader.Program, "model");
@@ -1637,7 +1671,6 @@ int main()
 		model = glm::translate(model, lightPos);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		// Draw the light object (using light's vertex attributes)
 
 		model = glm::mat4(1);
 		model = glm::translate(model, pointLightPositions[0]);
@@ -1648,23 +1681,39 @@ int main()
 
 		glBindVertexArray(0);
 
-		// Draw skybox as last
-		glDepthFunc(GL_LEQUAL); //hace que no interfiera con otros objetos //Función de profundidad
+		// ###########################################################
+		// ### DIBUJADO DEL SKYBOX (SKYBOX SHADER) ###
+		// ###########################################################
+		// ### SKYBOX ###
+		glDisable(GL_CULL_FACE);
+
+		glDepthFunc(GL_LEQUAL);
+		glDepthMask(GL_FALSE);                 // no escribir al z-buffer
+
 		skyboxshader.Use();
-		view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-		glUniformMatrix4fv(glGetUniformLocation(skyboxshader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniform1i(glGetUniformLocation(skyboxshader.Program, "skybox"), 0);
+		glm::mat4 viewNoPos = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(skyboxshader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewNoPos));
 		glUniformMatrix4fv(glGetUniformLocation(skyboxshader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		glBindVertexArray(skyBoxVAO);
-		glActiveTexture(GL_TEXTURE1);
+		// <<< nuevo: factor de oscuridad del skybox >>>
+		glUniform1f(glGetUniformLocation(skyboxshader.Program, "uDarken"), 0.35f); // prueba 0.3–0.6
+
+
+		glActiveTexture(GL_TEXTURE0);          // usa la unidad 0
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+		glBindVertexArray(skyBoxVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
+
+		glDepthMask(GL_TRUE);                  // restaura z-buffer
 		glDepthFunc(GL_LESS);
 
 
+
 		// Swap the buffers
-		
+
 		glfwSwapBuffers(window);
 
 	}
@@ -1676,9 +1725,8 @@ int main()
 	glDeleteBuffers(1, &skyBoxVBO);
 	ma_sound_uninit(&bgm_sound);
 	ma_engine_uninit(&audio_engine);
-	ma_sound_uninit(&steps_sound); // <-- Asegúrate de tener esta
+	ma_sound_uninit(&steps_sound);
 	ma_sound_uninit(&ladrido_sound);
-	glDeleteVertexArrays(1, &VAO);
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
 
@@ -1836,7 +1884,7 @@ void DoMovement()
 	{
 		pointLightPositions[0].z += 0.01f;
 	}
-
+	camera.SetPositionY(4.0f);
 }
 
 // Is called whenever a key is pressed/released via GLFW
