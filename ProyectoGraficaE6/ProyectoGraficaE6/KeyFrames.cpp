@@ -1,6 +1,10 @@
 ﻿/*
-Proyecto Equipo 6
-Fecha de entrega 12 de Noviembre del 2025
+Proyecto Equipo 6 "Galería de Arte" 
+Temática Terror
+
+Fecha de entrega: 12 de Noviembre del 2025
+Creadores del proyecto
+
 315143977
 318063188
 319279207
