@@ -44,7 +44,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 void Animation();
-
+void AnimatePerson();
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
@@ -160,10 +160,40 @@ bool wingUp2 = true;
 float perPosX = 0.0f, perPosY = 0.0f, perPosZ = 0.0f;  // posición de la persona
 float perRotY = 0.0f, perRotX = 0.0f;                  // yaw/pitch del torso
 float perHead = 0.0f;   // cabeza
-float perArmL = 0.0f;   // hombro izquierdo
-float perArmR = 0.0f;   // hombro derecho
-float perLegL = 0.0f;   // muslo izquierdo
-float perLegR = 0.0f;   // muslo derecho
+
+// --- ¡CAMBIO 1: 8 ESTADOS PARA RUTA COMPLETA! ---
+enum PersonState {
+	WALK_Z_NEG,  // Tramo 1: Camina en -Z
+	TURN_TO_X,   // Tramo 2: Gira 90 izq
+	WALK_X_NEG,  // Tramo 3: Camina en -X
+	TURN_180_X,  // Tramo 4: Gira 180 (para regresar por X)
+	WALK_X_POS,  // Tramo 5: Camina en +X (regreso)
+	TURN_TO_Z,   // Tramo 6: Gira 90 der (para regresar por Z)
+	WALK_Z_POS,  // Tramo 7: Camina en +Z (regreso)
+	TURN_180_Z   // Tramo 8: Gira 180 (para reiniciar ciclo)
+};
+PersonState personState;
+
+float personWalkSpeed = 2.0f;     // Unidades por segundo (un poco más lento)
+float personTurnSpeed = 90.0f;    // 90 grados por segundo
+float personCycleSpeed = 8.0f;    // Velocidad del ciclo de caminata
+float personWalkAngle = 0.0f;     // El "reloj" para la oscilación
+float stepRate = 2.2f;
+// --- Variables de Articulaciones ---
+float perArmL = 0.0f, perArmR = 0.0f;     // Hombros
+float perLegL = 0.0f, perLegR = 0.0f;     // Caderas
+float perKneeL = 0.0f, perKneeR = 0.0f;    // Rodillas
+float perElbowL = 0.0f, perElbowR = 0.0f; // Codos
+
+// --- ¡CAMBIO 2: NUEVAS VARIABLES DE DESTINO! ---
+float personTargetZ_1;   // 60 -> 20
+float personTargetRot_1; // 180 -> 270
+float personTargetX_1;   // 20 -> -20
+float personTargetRot_2; // 270 -> 90
+float personTargetX_2;   // -20 -> 20
+float personTargetRot_3; // 90 -> 0 
+float personTargetZ_2;   // 20 -> 60
+float personTargetRot_4; // 0 -> 180
 
 //KeyFrames
 float dogPosX, dogPosY, dogPosZ;
@@ -866,6 +896,25 @@ int main()
 	head = KeyFrame[0].head; // <-- AÑADIDO
 	tail = KeyFrame[0].tail;
 	// --------------------------------
+	// --- Establecemos la posición y estado inicial de la PERSONA ---
+	perPosX = 20.0f; // <-- Más a la izquierda (antes era 25.0)
+	perPosY = 0.3f;
+	perPosZ = 60.0f;
+	perRotY = 180.0f; // Mirando hacia Z negativo (Estado inicial)
+
+	// --- Definimos los objetivos de la FSM ---
+	// (Inicia en Z=60, X=20)
+	personTargetZ_1 = -13.0f;  // TRAMO 1: (Z) 60 a -15 
+	personTargetRot_1 = 270.0f;  // TRAMO 2: (Rot) 180 a 270 (Gira 90 izq)
+	personTargetX_1 = -22.0f;  // TRAMO 3: (X) 20 a -23 
+	personTargetRot_2 = 90.0f;   // TRAMO 4: (Rot) 270 a 90 (Giro 180)
+	personTargetX_2 = 20.0f;   // TRAMO 5: (X) -23 a 20 (Regreso)
+	personTargetRot_3 = 0.0f;    // TRAMO 6: (Rot) 90 a 0 (Giro 90 der)
+	personTargetZ_2 = 60.0f;   // TRAMO 7: (Z) -15 a 60 (Regreso)
+	personTargetRot_4 = 180.0f;  // TRAMO 8: (Rot) 0 a 180 (Giro 180)
+
+	// --- ESTADO INICIAL ---
+	personState = WALK_Z_NEG; // Inicia la animación automáticamente
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -879,7 +928,7 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 		Animation();
-		
+		AnimatePerson();
 
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -1309,75 +1358,116 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 
-		// --- TORSO DE LA PERSONA --- 
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f)); 
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		// ===============================================
+		// ===== PERSONA (CORRECCIÓN DE ORDEN DE ESCALA) =====
+		// ===============================================
+		shader.Use(); // Asegurarnos de que el shader correcto esté activo
+
+		// 1. Matriz Base (Torso) - SIN ESCALA
+		glm::mat4 personaBase = glm::mat4(1.0f);
+		personaBase = glm::translate(personaBase, glm::vec3(perPosX, perPosY, perPosZ));
+		personaBase = glm::rotate(personaBase, glm::radians(perRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+		personaBase = glm::rotate(personaBase, glm::radians(perRotX), glm::vec3(1.0f, 0.0f, 0.0f));
+		// *** ¡LA ESCALA SE QUITÓ DE AQUÍ! ***
+
+		// 1.b. Dibujar Torso (con su propia escala)
+		glm::mat4 modelTorso = personaBase; // Copia la base
+		modelTorso = glm::scale(modelTorso, glm::vec3(0.4f)); // Aplica escala SÓLO al torso
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelTorso));
 		Ptorso.Draw(shader);
 
-		//--- CABEZA DE LA PERSONA --- 
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f)); 
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
-		model = glm::scale(model, glm::vec3(0.4f)); 
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); 
+		// 2. Cabeza (hija de personaBase)
+		glm::mat4 modelCabezaP = personaBase; // <-- Empieza desde la base SIN ESCALA
+		modelCabezaP = glm::translate(modelCabezaP, glm::vec3(0.0f, 0.0f, 0.0f)); // Pivote (ahora en espacio normal)
+		modelCabezaP = glm::rotate(modelCabezaP, glm::radians(perHead), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelCabezaP = glm::scale(modelCabezaP, glm::vec3(0.4f)); // Aplicar escala AL FINAL
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelCabezaP));
 		Pcabeza.Draw(shader);
 
-		// --- HOMBRO IZQUIERDO ---
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Phombroizq.Draw(shader);
+		// --- JERARQUÍA DEL BRAZO IZQUIERDO ---
+		// 3. Hombro Izquierdo (Matriz padre para el codo)
+		glm::mat4 modelHomL_sinEscala = personaBase; // <-- Empieza desde la base SIN ESCALA
+		modelHomL_sinEscala = glm::translate(modelHomL_sinEscala, glm::vec3(0.0f, 0.0f, 0.0f)); // Pivote (espacio normal)
+		modelHomL_sinEscala = glm::rotate(modelHomL_sinEscala, glm::radians(perArmL), glm::vec3(1.0f, 0.0f, 0.0f));
 
-		// --- HOMBRO DERECHO ---
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Phombroder.Draw(shader);
-
-		// --- ANTEBRAZO IZQUIERDO ---
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 7. Antebrazo Izquierdo (hijo de Hombro Izq)
+		glm::mat4 modelAntL = modelHomL_sinEscala; // <-- EMPIEZA DESDE EL HOMBRO (sin escala)
+		modelAntL = glm::translate(modelAntL, glm::vec3(-0.30f, 0.30f, -0.70f)); // Pivote (espacio normal)
+		modelAntL = glm::rotate(modelAntL, glm::radians(perElbowL), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelAntL = glm::scale(modelAntL, glm::vec3(0.4f)); // Escala AL FINAL
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelAntL));
 		Pantebrasizq.Draw(shader);
 
-		// --- ANTEBRAZO DERECHO ---
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 3.b. Dibujar Hombro Izquierdo (Ahora dibujamos el padre)
+		glm::mat4 modelHomL_conEscala = modelHomL_sinEscala; // Tomamos la matriz sin escala
+		modelHomL_conEscala = glm::scale(modelHomL_conEscala, glm::vec3(0.4f)); // Escala AL FINAL
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelHomL_conEscala));
+		Phombroizq.Draw(shader);
+
+		// --- JERARQUÍA DEL BRAZO DERECHO ---
+		// 4. Hombro Derecho (Matriz padre para el codo)
+		glm::mat4 modelHomR_sinEscala = personaBase;
+		modelHomR_sinEscala = glm::translate(modelHomR_sinEscala, glm::vec3(-0.0f, 0.0f, 0.0f));
+		modelHomR_sinEscala = glm::rotate(modelHomR_sinEscala, glm::radians(perArmR), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		// 8. Antebrazo Derecho (hijo de Hombro Der)
+		glm::mat4 modelAntR = modelHomR_sinEscala;
+		modelAntR = glm::translate(modelAntR, glm::vec3(0.0f, -0.0f, -0.50f));
+		modelAntR = glm::rotate(modelAntR, glm::radians(perElbowR), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelAntR = glm::scale(modelAntR, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelAntR));
 		Pantebrasder.Draw(shader);
 
-		// --- MUSLO IZQUIERDO---
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Pmusloizq.Draw(shader);
+		// 4.b. Dibujar Hombro Derecho (Padre)
+		glm::mat4 modelHomR_conEscala = modelHomR_sinEscala;
+		modelHomR_conEscala = glm::scale(modelHomR_conEscala, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelHomR_conEscala));
+		Phombroder.Draw(shader);
 
-		// --- MUSLO DERECHO ---
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		Pmusloder.Draw(shader);
+		// --- JERARQUÍA DE LA PIERNA IZQUIERDA ---
+		// 5. Muslo Izquierdo (Matriz padre para la rodilla)
+		glm::mat4 modelMusL_sinEscala = personaBase;
+		modelMusL_sinEscala = glm::translate(modelMusL_sinEscala, glm::vec3(0.0f, 0.30f, 0.0f));
+		modelMusL_sinEscala = glm::rotate(modelMusL_sinEscala, glm::radians(perLegL), glm::vec3(1.0f, 0.0f, 0.0f));
 
-		// --- RODILLA IZQUIERDA ---
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 9. Rodilla Izquierda (hija de Muslo Izq)
+		glm::mat4 modelRodL = modelMusL_sinEscala;
+		modelRodL = glm::translate(modelRodL, glm::vec3(0.0f, 0.350f, 0.0f));
+		modelRodL = glm::rotate(modelRodL, glm::radians(perKneeL), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelRodL = glm::scale(modelRodL, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelRodL));
 		Prodillaizq.Draw(shader);
 
-		// --- RODILLA DERECHA ---
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 0.3f, 60.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// 5.b. Dibujar Muslo Izquierdo (Padre)
+		glm::mat4 modelMusL_conEscala = modelMusL_sinEscala;
+		modelMusL_conEscala = glm::scale(modelMusL_conEscala, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMusL_conEscala));
+		Pmusloizq.Draw(shader);
+
+		// --- JERARQUÍA DE LA PIERNA DERECHA ---
+		// 6. Muslo Derecho (Matriz padre para la rodilla)
+		glm::mat4 modelMusR_sinEscala = personaBase;
+		modelMusR_sinEscala = glm::translate(modelMusR_sinEscala, glm::vec3(-0.0f, 0.30f, 0.0f));
+		modelMusR_sinEscala = glm::rotate(modelMusR_sinEscala, glm::radians(perLegR), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		// 10. Rodilla Derecha (hija de Muslo Der)
+		glm::mat4 modelRodR = modelMusR_sinEscala;
+		modelRodR = glm::translate(modelRodR, glm::vec3(0.0f, 0.350f, 0.0f));
+		modelRodR = glm::rotate(modelRodR, glm::radians(perKneeR), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelRodR = glm::scale(modelRodR, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelRodR));
 		Prodillader.Draw(shader);
+
+		// 6.b. Dibujar Muslo Derecho (Padre)
+		glm::mat4 modelMusR_conEscala = modelMusR_sinEscala;
+		modelMusR_conEscala = glm::scale(modelMusR_conEscala, glm::vec3(0.4f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMusR_conEscala));
+		Pmusloder.Draw(shader);
+
+
+		// ===============================================
+		// ===== FIN DE PERSONA =====
+		// ===============================================
 
 
         // Escultura torso
@@ -1826,6 +1916,147 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 
 
 }
+// ==========================================================
+// --- MÁQUINA DE ESTADOS DE LA PERSONA (RUTA COMPLETA) ---
+// ==========================================================
+void AnimatePerson()
+{
+	// 's' es el seno de la fase, va de -1 a 1
+	float s = 0.0f;
+
+	switch (personState)
+	{
+	case WALK_Z_NEG: // TRAMO 1: Caminar 40 en -Z
+	{
+		// 1. Mover el cuerpo
+		perPosZ -= personWalkSpeed * deltaTime;
+		perPosY = 0.3f + 0.02f * (1.0f - cosf(2.0f * personWalkAngle));
+
+		// 2. Animar el ciclo de caminata
+		personWalkAngle += glm::two_pi<float>() * stepRate * deltaTime;
+		if (personWalkAngle > glm::two_pi<float>()) personWalkAngle -= glm::two_pi<float>();
+		s = sinf(personWalkAngle); // Seno de la fase
+
+		// 3. Comprobar si ha llegado al destino
+		if (perPosZ <= personTargetZ_1) {
+			perPosZ = personTargetZ_1; // Snap
+			personState = TURN_TO_X;   // Siguiente estado
+			s = 0.0f; perPosY = 0.3f;
+		}
+		break;
+	}
+
+	case TURN_TO_X: // TRAMO 2: Girar 90 izq (180 -> 270)
+	{
+		perRotY += personTurnSpeed * deltaTime; // Giro anti-horario
+		if (perRotY >= personTargetRot_1) {
+			perRotY = personTargetRot_1;
+			personState = WALK_X_NEG;
+		}
+		s = 0.0f;
+		break;
+	}
+
+	case WALK_X_NEG: // TRAMO 3: Caminar 40 en -X
+	{
+		perPosX -= personWalkSpeed * deltaTime;
+		perPosY = 0.3f + 0.02f * (1.0f - cosf(2.0f * personWalkAngle));
+		personWalkAngle += glm::two_pi<float>() * stepRate * deltaTime;
+		if (personWalkAngle > glm::two_pi<float>()) personWalkAngle -= glm::two_pi<float>();
+		s = sinf(personWalkAngle);
+
+		if (perPosX <= personTargetX_1) {
+			perPosX = personTargetX_1;
+			personState = TURN_180_X;
+			s = 0.0f; perPosY = 0.3f;
+		}
+		break;
+	}
+
+	case TURN_180_X: // TRAMO 4: Gira 180 (270 -> 90)
+	{
+		perRotY -= personTurnSpeed * deltaTime; // Giro horario
+		if (perRotY <= personTargetRot_2) {
+			perRotY = personTargetRot_2;
+			personState = WALK_X_POS;
+		}
+		s = 0.0f;
+		break;
+	}
+
+	case WALK_X_POS: // TRAMO 5: Caminar 40 en +X (Regreso)
+	{
+		perPosX += personWalkSpeed * deltaTime;
+		perPosY = 0.3f + 0.02f * (1.0f - cosf(2.0f * personWalkAngle));
+		personWalkAngle += glm::two_pi<float>() * stepRate * deltaTime;
+		if (personWalkAngle > glm::two_pi<float>()) personWalkAngle -= glm::two_pi<float>();
+		s = sinf(personWalkAngle);
+
+		if (perPosX >= personTargetX_2) {
+			perPosX = personTargetX_2;
+			personState = TURN_TO_Z;
+			s = 0.0f; perPosY = 0.3f;
+		}
+		break;
+	}
+
+	case TURN_TO_Z: // TRAMO 6: Gira 90 der (90 -> 0)
+	{
+		perRotY -= personTurnSpeed * deltaTime; // Giro horario
+		if (perRotY <= personTargetRot_3) {
+			perRotY = 0.0f; // Snap a 0
+			personState = WALK_Z_POS;
+		}
+		s = 0.0f;
+		break;
+	}
+
+	case WALK_Z_POS: // TRAMO 7: Caminar 40 en +Z (Regreso)
+	{
+		perPosZ += personWalkSpeed * deltaTime;
+		perPosY = 0.3f + 0.02f * (1.0f - cosf(2.0f * personWalkAngle));
+		personWalkAngle += glm::two_pi<float>() * stepRate * deltaTime;
+		if (personWalkAngle > glm::two_pi<float>()) personWalkAngle -= glm::two_pi<float>();
+		s = sinf(personWalkAngle);
+
+		if (perPosZ >= personTargetZ_2) {
+			perPosZ = personTargetZ_2;
+			personState = TURN_180_Z;
+			s = 0.0f; perPosY = 0.3f;
+		}
+		break;
+	}
+
+	case TURN_180_Z: // TRAMO 8: Gira 180 (0 -> 180)
+	{
+		perRotY += personTurnSpeed * deltaTime; // Giro anti-horario
+		if (perRotY >= personTargetRot_4) {
+			perRotY = personTargetRot_4;
+			personState = WALK_Z_NEG; // Reinicia el ciclo
+		}
+		s = 0.0f;
+		break;
+	}
+	} // Fin del switch
+
+	// --- Aplicar Animación de Articulaciones (TUS VALORES) ---
+	// Caderas (Muslos)
+	perLegL = 3.0f * s;
+	perLegR = -3.0f * s;
+
+	// Rodillas
+	perKneeL = 2.0f + 8.0f * std::max(0.0f, s);
+	perKneeR = 2.0f + 8.0f * std::max(0.0f, -s);
+
+	// Hombros (Brazos)
+	perArmL = -3.0f * s;
+	perArmR = 3.0f * s;
+
+	// Codos
+	perElbowL = 8.0f;
+	perElbowR = 8.0f;
+}
+
 void Animation() {
 
 	// --- LÓGICA DE AUDIO DEL PERRO ---
