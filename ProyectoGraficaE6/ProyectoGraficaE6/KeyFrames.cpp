@@ -51,6 +51,7 @@ void DoMovement();
 void Animation();
 void AnimatePerson();
 void AnimateSkeleton();
+void AnimateSculpture();
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
@@ -167,6 +168,15 @@ float perPosX = 0.0f, perPosY = 0.0f, perPosZ = 0.0f;  // posición de la person
 float perRotY = 0.0f, perRotX = 0.0f;                  // yaw/pitch del torso
 float perHead = 0.0f;   // cabeza
 
+// ---- VARIABLES DE LA ESCULTURA (LEVITACIÓN) ----
+
+float sculTime = 0.0f;        // Tiempo propio de la escultura
+float sculY = 1.0f;           // Altura para levitar (inicia en 0.3 como estaba)
+float sculHeadY = 0.0f;       // Rotación cabeza (dice no)
+float sculArmL = 0.0f;        // Rotación brazo izq
+float sculArmR = 0.0f;        // Rotación brazo der
+float sculLegL = 0.0f;        // Rotación pierna izq
+float sculLegR = 0.0f;        // Rotación pierna der
 // --- ¡CAMBIO 1: 8 ESTADOS PARA RUTA COMPLETA! ---
 enum PersonState {
 	WALK_Z_NEG,  // Tramo 1: Camina en -Z
@@ -991,6 +1001,7 @@ int main()
 		Animation();
 		AnimatePerson();
 		AnimateSkeleton();
+		AnimateSculpture();
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1522,64 +1533,87 @@ int main()
 		// ===============================================
 
 
-		// Escultura torso
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// ===============================================
+		// ===== ESCULTURA ANIMADA (LEVITANDO CORREGIDO) =====
+		// ===============================================
+
+		// 1. MATRIZ BASE (TORSO)
+		// Esta matriz controla la posición GLOBAL y la LEVITACIÓN
+		glm::mat4 sculptBase = glm::mat4(1.0f);
+		sculptBase = glm::translate(sculptBase, glm::vec3(0.0f, sculY, 6.0f)); // Posición en el mundo
+		sculptBase = glm::scale(sculptBase, glm::vec3(0.8f)); // Escala global
+
+		// --- DIBUJAR TORSO (Base estática) ---
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(sculptBase));
 		Vietor.Draw(lightingShader);
 
-		// Escultura cabeza
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// --- DIBUJAR CABEZA (Pivote en el cuello) ---
+		glm::mat4 modelScab = sculptBase;
+		// 1. Ir al cuello (aprox 1.6 en Y)
+		modelScab = glm::translate(modelScab, glm::vec3(0.0f, 1.3f, 0.0f));
+		// 2. Rotar
+		modelScab = glm::rotate(modelScab, glm::radians(sculHeadY), glm::vec3(0.0f, 1.0f, 0.0f));
+		// 3. Regresar del cuello (para que el modelo se dibuje en su sitio)
+		modelScab = glm::translate(modelScab, glm::vec3(0.0f, -1.6f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelScab));
 		Viecab.Draw(lightingShader);
 
-		// Escultura brazo izquierdo
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// --- BRAZO IZQUIERDO (Pivote en hombro izq) ---
+		glm::mat4 modelSbraL = sculptBase;
+		modelSbraL = glm::translate(modelSbraL, glm::vec3(0.5f, 5.1f, 3.0f));
+		modelSbraL = glm::rotate(modelSbraL, glm::radians(sculArmL), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelSbraL = glm::translate(modelSbraL, glm::vec3(-0.5f, -1.45f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSbraL));
 		Viebraizq.Draw(lightingShader);
 
-		// Escultura brazo derecho
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Viebrader.Draw(lightingShader);
-
-		// Escultura antebrazo izquierdo
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// Antebrazo Izquierdo (Sigue al brazo)
+		glm::mat4 modelSantL = modelSbraL;
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSantL));
 		Vieanbizq.Draw(lightingShader);
 
-		// Escultura antebrazo derecho
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// --- BRAZO DERECHO (Pivote en hombro der) ---
+		glm::mat4 modelSbraR = sculptBase;
+		modelSbraR = glm::translate(modelSbraR, glm::vec3(-0.5f, 5.1f, 3.0f));
+		modelSbraR = glm::rotate(modelSbraR, glm::radians(sculArmR), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelSbraR = glm::translate(modelSbraR, glm::vec3(0.5f, -1.45f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSbraR));
+		Viebrader.Draw(lightingShader);
+
+		// Antebrazo Derecho (Sigue al brazo)
+		glm::mat4 modelSantR = modelSbraR;
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSantR));
 		Vieanbder.Draw(lightingShader);
 
-		// Escultura muslo izquierdo
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// --- PIERNA IZQUIERDA (Pivote en cadera izq) ---
+		glm::mat4 modelSmusL = sculptBase;
+		// 1. Ir a la cadera
+		modelSmusL = glm::translate(modelSmusL, glm::vec3(0.25f, 0.5f, 0.0f));
+		// 2. Rotar
+		modelSmusL = glm::rotate(modelSmusL, glm::radians(sculLegL), glm::vec3(1.0f, 0.0f, 0.0f));
+		// 3. Regresar
+		modelSmusL = glm::translate(modelSmusL, glm::vec3(-0.25f, -0.9f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSmusL));
 		Viemusizq.Draw(lightingShader);
 
-		// Escultura muslo derecho
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Viemusder.Draw(lightingShader);
-
-		// Escultura pierna izquierda
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// Pierna (pantorrilla) Izquierda
+		glm::mat4 modelSpieL = modelSmusL;
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSpieL));
 		Viepieizq.Draw(lightingShader);
 
-		// Escultura pierna derecha
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.8f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// --- PIERNA DERECHA (Pivote en cadera der) ---
+		glm::mat4 modelSmusR = sculptBase;
+		// 1. Ir a la cadera
+		modelSmusR = glm::translate(modelSmusR, glm::vec3(-0.25f, 0.5f, 0.0f));
+		// 2. Rotar
+		modelSmusR = glm::rotate(modelSmusR, glm::radians(sculLegR), glm::vec3(1.0f, 0.0f, 0.0f));
+		// 3. Regresar
+		modelSmusR = glm::translate(modelSmusR, glm::vec3(0.25f, -0.9f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSmusR));
+		Viemusder.Draw(lightingShader);
+
+		// Pierna (pantorrilla) Derecha
+		glm::mat4 modelSpieR = modelSmusR;
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSpieR));
 		Viepieder.Draw(lightingShader);
 
 		// ===============================================
@@ -2221,4 +2255,31 @@ void AnimateSkeleton()
 
 	skelLegL = legSwing;
 	skelLegR = -legSwing; // Opuesto
+}
+// ==========================================================
+// --- ANIMACIÓN ESCULTURA (Versión Calma / Sutil) ---
+// ==========================================================
+void AnimateSculpture()
+{
+	sculTime += deltaTime;
+
+	// 1. LEVITACIÓN (Más suave)
+	// Antes: 0.2f -> Ahora: 0.1f (Flota menos distancia vertical)
+	// Velocidad: 1.5f -> 1.0f (Flota más lento)
+	sculY = 2.0f + 0.5f * sin(sculTime * 1.0f);
+
+	// 2. BRAZOS (Movimiento ligero)
+	// Antes: 15.0f grados -> Ahora: 5.0f grados (Apenas los mece)
+	// Velocidad: 2.0f -> 1.0f
+	sculArmL = -42.0f + 3.0f * sin(sculTime * 1.0f);
+	sculArmR = -40.0f + 3.0f * cos(sculTime * 1.0f);
+
+	// 3. PIERNAS (Casi quietas, solo un leve vaivén)
+	// Antes: 10.0f -> Ahora: 3.0f
+	sculLegL = 4.0f * sin(sculTime * 0.8f);
+	sculLegR = 4.0f * cos(sculTime * 0.8f);
+
+	// 4. CABEZA (Mira muy despacio)
+	// Antes: 20.0f -> Ahora: 10.0f
+	sculHeadY = 5.0f * sin(sculTime * 1.0f);
 }
