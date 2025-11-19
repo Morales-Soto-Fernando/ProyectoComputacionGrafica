@@ -2,7 +2,7 @@
 Proyecto Equipo 6 "Galería de Arte" 
 Temática Terror
 
-Fecha de entrega: 12 de Noviembre del 2025
+Fecha de entrega: 19 de Noviembre del 2025
 Creadores del proyecto
 
 315143977
